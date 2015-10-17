@@ -142,9 +142,9 @@ namespace Opuz2015
 
 			puzzle = new Puzzle ();
 
-			puzzle.Pieces [0, 0].Transformations = Matrix4.CreateTranslation (-10, -10, 0);
-			puzzle.Pieces [1, 1].Transformations = Matrix4.CreateTranslation (-100, -100, 0) *
-				Matrix4.CreateRotationZ(MathHelper.PiOver2);
+			puzzle.Pieces [0, 0].Move(-10, -10);
+			//puzzle.Pieces [1, 1].Move (-100, -100);
+			puzzle.Pieces [1, 1].Rotate();
 
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");			
@@ -158,6 +158,20 @@ namespace Opuz2015
 
 			puzzle.Render ();
 
+			if (selMesh == null)
+				return;
+
+			redShader.Enable ();
+			redShader.ProjectionMatrix = projection;
+			redShader.ModelViewMatrix = modelview;
+			redShader.ModelMatrix = puzzle.SelectedPiece.Transformations;
+
+			GL.PointSize (2f);
+			GL.Disable (EnableCap.DepthTest);
+			selMesh.Render (PrimitiveType.TriangleStrip);
+			GL.Enable (EnableCap.DepthTest);
+			GL.UseProgram (0);
+
 			//renderArrow ();
 		}
 			
@@ -167,9 +181,12 @@ namespace Opuz2015
 
 			Mouse.WheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
 			Mouse.Move += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
+			Mouse.ButtonDown += Mouse_ButtonDown;
+			Mouse.ButtonUp += Mouse_ButtonUp;
 
 			initOpenGL ();
 		}
+			
 		public override void GLClear ()
 		{
 			GL.ClearColor(0.1f, 0.1f, 0.3f, 1.0f);
@@ -207,6 +224,7 @@ namespace Opuz2015
 				break;
 			}
 		}
+		vaoMesh selMesh;
 
 		#region vLookCalculations
 		public void UpdateViewMatrix()
@@ -216,10 +234,9 @@ namespace Opuz2015
 			projection = Matrix4.CreatePerspectiveFieldOfView (fovY, r.Width / (float)r.Height, zNear, zFar);
 				//*Matrix4.CreateRotationZ(MathHelper.Pi);
 			vLook = Vector3.NormalizeFast (vEyeTarget - vEye);
-
 			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
+			GL.GetInteger(GetPName.Viewport, viewport);
 
-			//GL.GetInteger(GetPName.Viewport, viewport);
 			try {
 				mainShader.ProjectionMatrix = projection;
 				mainShader.ModelViewMatrix = modelview;
@@ -257,6 +274,42 @@ namespace Opuz2015
 		#endregion
 
 		#region Mouse
+		void Mouse_ButtonDown (object sender, MouseButtonEventArgs e)
+		{
+			
+
+			if (e.Button == MouseButton.Left) {
+				Point<float> mPos = new Point<float> (e.X, e.Y);
+				mPos.Y = viewport [3] - mPos.Y;
+				foreach (Piece p in puzzle.Pieces) {
+					if (p.MouseIsIn (mPos)) {
+						this.CursorVisible = false;
+						puzzle.SelectedPiece = p;
+						Point<float> c = p.Bounds.Center;
+						//selMesh = new vaoMesh (c.X, c.Y, 15f, 50f, 50f);
+						selMesh = new vaoMesh (c.X, c.Y, 15f, p.Bounds.Width, p.Bounds.Height);
+						p.Move (0f, 0f, 15f);
+						break;
+					}
+				}
+			} else if (e.Button == MouseButton.Right) {
+				if (puzzle.SelectedPiece == null)
+					return;
+				puzzle.SelectedPiece.Rotate ();
+			}
+
+		}
+		void Mouse_ButtonUp (object sender, MouseButtonEventArgs e)
+		{			
+			if (puzzle.SelectedPiece == null || e.Button != MouseButton.Left)
+				return;
+			this.CursorVisible = true;
+			puzzle.SelectedPiece.Move (0f, 0f, -15f);
+			selMesh.Dispose ();
+			selMesh = null;
+			puzzle.SelectedPiece = null;
+		}
+
 		void Mouse_Move(object sender, MouseMoveEventArgs e)
 		{
 			if (e.XDelta != 0 || e.YDelta != 0)
@@ -269,6 +322,12 @@ namespace Opuz2015
 
 					UpdateViewMatrix ();
 					return;
+				}
+				if (e.Mouse.LeftButton == ButtonState.Pressed) {
+					if (puzzle.SelectedPiece != null) {
+						puzzle.SelectedPiece.Move ((float)e.XDelta, -(float)e.YDelta);
+						return;
+					}
 				}
 				if (e.Mouse.RightButton == ButtonState.Pressed) {
 					Matrix4 m = Matrix4.CreateTranslation (-e.XDelta, e.YDelta, 0);
