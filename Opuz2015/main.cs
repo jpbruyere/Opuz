@@ -67,13 +67,13 @@ namespace Opuz2015
 		public static int[] viewport = new int[4];
 
 		//public static Vector3 vEye = new Vector3(150.0f, 50.0f, 1.5f);    // Camera Position
-		public static Vector3 vEye = new Vector3(-5.0f, -5.0f, 5.0f);    // Camera Position
-		public static Vector3 vEyeTarget = new Vector3(0f, 0f, 0.0f);
+		public static Vector3 vEye = new Vector3(500.0f, -100.0f, 1400.0f);    // Camera Position
+		public static Vector3 vEyeTarget = new Vector3(500, 330, 0f);
 		public static Vector3 vLook = new Vector3(0.5f, 0.5f, -0.5f);  // Camera vLook Vector
 		public static Vector4 vLight = new Vector4 (-5.0f, -5.0f, 25.0f, 0.0f);
 		public static Vector3 vMouse = Vector3.Zero;
 
-		float _zFar = 2000.0f;
+		float _zFar = 20000.0f;
 
 		public float zFar {
 			get { return _zFar; }
@@ -85,7 +85,7 @@ namespace Opuz2015
 		public float zNear = 0.001f;
 		public float fovY = (float)Math.PI / 4;
 
-		float MoveSpeed = 1.0f;
+		float MoveSpeed = 100.0f;
 		float RotationSpeed = 0.02f;
 		#endregion
 
@@ -104,9 +104,7 @@ namespace Opuz2015
 			mainShader.ModelMatrix = Matrix4.Identity;
 
 		}
-
-		Piece test;
-		Texture tex;
+			
 
 		void renderArrow(){
 			redShader.Enable ();
@@ -115,7 +113,7 @@ namespace Opuz2015
 			redShader.ModelMatrix = Matrix4.Identity;
 			GL.PointSize (2f);
 			GL.Disable (EnableCap.CullFace);
-			test.Render ();
+			puzzle.Render ();
 			GL.Enable (EnableCap.CullFace);
 			redShader.Disable ();
 		}
@@ -127,7 +125,8 @@ namespace Opuz2015
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 			GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Less);
-			GL.Enable(EnableCap.CullFace);
+			//GL.Enable(EnableCap.CullFace);
+
 			GL.PrimitiveRestartIndex (int.MaxValue);
 			GL.Enable (EnableCap.PrimitiveRestart);
 			GL.Enable (EnableCap.Blend);
@@ -141,52 +140,23 @@ namespace Opuz2015
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 
-			//mesh = vaoMesh.Load (@"/mnt/data/obj/spaceship.obj");
-			Vector3[] positions = new Vector3[]
-			{
-				new Vector3(0,0,0),
-				new Vector3(2,0,0),
-				new Vector3(1,1,0),
-			};
-			Vector2[] texcoords = new Vector2[]
-			{
-				new Vector2(0,0),
-				new Vector2(1,0),
-				new Vector2(0.5f,1f),
-			};
-			Vector3[] normales = new Vector3[]
-			{
-				new Vector3(0,0,1),
-				new Vector3(0,0,1),
-				new Vector3(0,0,1),
-			};
-			int[] indices = new int[] { 0, 1, 2 };
-			mesh = new vaoMesh (positions, texcoords, normales, indices);
-			meshTex = new Texture(@"/mnt/data/obj/sf-01.jpg");
+			puzzle = new Puzzle ();
 
-			test = new Piece ();
-
-			System.Drawing.Bitmap bmp = new System.Drawing.Bitmap (@"/mnt/data/Images/00.jpg");
-
-
-			tex = new Texture (@"/mnt/data/Images/00.jpg");
-
-
-
+			puzzle.Pieces [0, 0].Transformations = Matrix4.CreateTranslation (-10, -10, 0);
+			puzzle.Pieces [1, 1].Transformations = Matrix4.CreateTranslation (-100, -100, 0) *
+				Matrix4.CreateRotationZ(MathHelper.PiOver2);
 
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");			
 		}
 
-		vaoMesh mesh;
-		int meshTex;
+		Puzzle puzzle;
 
 		void draw()
 		{
 			ActivateMainShader ();
-			GL.BindTexture (TextureTarget.Texture2D, tex);
-			test.Render ();
-			GL.BindTexture (TextureTarget.Texture2D, 0);
+
+			puzzle.Render ();
 
 			//renderArrow ();
 		}
@@ -228,26 +198,25 @@ namespace Opuz2015
 
 			}
 			frameCpt++;
-
-			UpdateViewMatrix ();
 		}
 		protected override void OnKeyDown (KeyboardKeyEventArgs e)
 		{
 			base.OnKeyDown (e);
 			switch (e.Key) {
 			case Key.Space:
-				test.Dispose();
-				test = new Piece ();
 				break;
 			}
 		}
+
 		#region vLookCalculations
 		public void UpdateViewMatrix()
 		{
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);
-			projection = Matrix4.CreatePerspectiveFieldOfView(fovY, r.Width / (float)r.Height, zNear, zFar);
-			vEyeTarget = vEye + vLook;
+			projection = Matrix4.CreatePerspectiveFieldOfView (fovY, r.Width / (float)r.Height, zNear, zFar);
+				//*Matrix4.CreateRotationZ(MathHelper.Pi);
+			vLook = Vector3.NormalizeFast (vEyeTarget - vEye);
+
 			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
 
 			//GL.GetInteger(GetPName.Viewport, viewport);
@@ -256,7 +225,7 @@ namespace Opuz2015
 				mainShader.ModelViewMatrix = modelview;
 				mainShader.ModelMatrix = Matrix4.Identity;
 			} catch (Exception ex) {
-
+				Debug.WriteLine ("UpdateViewMatrices: failed to set shader matrices: " + ex.Message);
 			}
 		}
 		Vector3 vLookDirOnXYPlane
@@ -293,20 +262,20 @@ namespace Opuz2015
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
-					Matrix4 m = Matrix4.CreateRotationZ (e.XDelta * RotationSpeed);
-					Matrix4 m2 = Matrix4.CreateFromAxisAngle (vLookPerpendicularOnXYPlane, e.YDelta * RotationSpeed);
-					vEye = Vector3.Transform (vEye, m * m2);
-					vEyeTarget = Vector3.Zero;
-					vLook = vEyeTarget - vEye;
+					vEye = Vector3.Transform (vEye, 
+						Matrix4.CreateTranslation (-vEyeTarget) *
+						Matrix4.CreateRotationX (-e.YDelta * RotationSpeed) *
+						Matrix4.CreateTranslation (vEyeTarget));
+
 					UpdateViewMatrix ();
 					return;
 				}
 				if (e.Mouse.RightButton == ButtonState.Pressed) {
+					Matrix4 m = Matrix4.CreateTranslation (-e.XDelta, e.YDelta, 0);
 
-					Matrix4 m = Matrix4.CreateRotationZ (-e.XDelta * RotationSpeed);
-					Matrix4 m2 = Matrix4.Rotate (vLookPerpendicularOnXYPlane, -e.YDelta * RotationSpeed);
-
-					vLook = Vector3.Transform (vLook, m * m2);
+					vEye = Vector3.Transform (vEye, m);
+					vEyeTarget = Vector3.Transform (vEyeTarget, m);
+					//vLook = Vector3.Transform (vLook, m);
 
 					//vLook = Vector3.Transform(vLook, m2);
 					UpdateViewMatrix ();

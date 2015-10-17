@@ -14,8 +14,7 @@ out vec2 texCoord;
 
 
 void main(void)
-{
-	
-	texCoord = vec2(in_position);
+{	
+	texCoord = vec2(in_position) / vec2(1000.0,667);
 	gl_Position = Projection * ModelView * Model * vec4(in_position, 1);
 }

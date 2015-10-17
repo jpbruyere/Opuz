@@ -28,10 +28,9 @@ using System.Diagnostics;
 
 namespace Opuz2015
 {
-	public class Side
+	public class Cut
 	{
 		static Random rnd = new Random();
-		public float Length = 5f;
 		public bool TutIsInside = false;
 
 		public Vector3[] Positions;
@@ -43,18 +42,18 @@ namespace Opuz2015
 		const float tutHeightVariance = 0.2f;
 		const float tutPosVariance = 0.2f;
 
-		public static int NbPoints { get {return resolution + 2; }}
+		public static int NbPoints { get {return resolution + 1; }}
 
-		public Side ()
+		public Cut (float startPos, float length)
 		{
-			float tw = Length * tutWidth;
-			float th = Length * tutHeight;
-			float tp = Length / 2f;
+			float tw = length * tutWidth;
+			float th = length * tutHeight;
+			float tp = length / 2f;
 
 
 			tw = tw + (float)(0.5 - rnd.NextDouble())*tw*tutWidthVariance;
 			th = th + (float)(0.5 - rnd.NextDouble())*th*tutHeightVariance;
-			tp = tp + (float)(0.5 - rnd.NextDouble())*Length*tutPosVariance;
+			tp = tp + (float)(0.5 - rnd.NextDouble())*length*tutPosVariance;
 
 			if (rnd.NextDouble () < 0.5) {
 				th = -th;
@@ -63,12 +62,12 @@ namespace Opuz2015
 				
 
 			Vector3[] p = new Vector3[] {
-				new Vector3 (0, 0, 0),
-				new Vector3 (tp - tw, 		0, 0),
-				new Vector3 (tp - tw * 3.0f, 	th, 0),
-				new Vector3 (tp + tw * 3.0f,	th, 0),
-				new Vector3 (tp + tw, 		0, 0),
-				new Vector3 (Length, 0, 0)
+				new Vector3 (startPos, 0, 0),
+				new Vector3 (startPos + tp - tw, 		0, 0),
+				new Vector3 (startPos + tp - tw * 3.0f, 	th, 0),
+				new Vector3 (startPos + tp + tw * 3.0f,	th, 0),
+				new Vector3 (startPos + tp + tw, 		0, 0),
+				new Vector3 (startPos + length, 0, 0)
 			};
 
 			List<Vector3> points = new List<Vector3> ();
@@ -77,7 +76,7 @@ namespace Opuz2015
 				float t = i / (float)(resolution-1);
 				points.Add(CalculateBezierPoint(t,p[1],p[2],p[3],p[4]));
 			}
-			points.Add (p [5]);	
+			//points.Add (p [5]);	
 
 			Positions = points.ToArray ();
 		}
