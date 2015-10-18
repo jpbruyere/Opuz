@@ -219,6 +219,8 @@ namespace Opuz2015
 
 			}
 			frameCpt++;
+
+			GGL.Animation.ProcessAnimations ();
 		}
 		protected override void OnKeyDown (KeyboardKeyEventArgs e)
 		{
@@ -280,7 +282,7 @@ namespace Opuz2015
 		#region Mouse
 		void Mouse_ButtonDown (object sender, MouseButtonEventArgs e)
 		{
-			
+			CursorVisible = true;
 
 			if (e.Button == MouseButton.Left) {
 				Point<float> mPos = new Point<float> (e.X, e.Y);

@@ -73,8 +73,11 @@ namespace Opuz2015
 		}
 		public float Angle {
 			get { return angle; }
-			set {				
-				angle = value;
+			set {	
+				if (value == -MathHelper.TwoPi)
+					angle = 0f;
+				else
+					angle = value;
 				transformationsAreUpToDate = false;
 			}
 		}
@@ -108,10 +111,34 @@ namespace Opuz2015
 				return;
 			Visited = true;
 
-			if (Angle == -MathHelper.ThreePiOver2)
-				Angle = 0f;
-			else
-				Angle -= MathHelper.PiOver2;
+			float tmp = 0f;
+
+//			if (Angle == -MathHelper.ThreePiOver2)
+//				tmp = 0f;
+//			else
+			float res = Angle / MathHelper.PiOver2;
+			int nbPi = (int)Math.Floor(-res);
+			Debug.WriteLine (res);
+
+			if (res % 1 != 0)
+				nbPi++;
+			
+			switch (nbPi) {
+			case 0:
+				tmp = -MathHelper.PiOver2;
+				break;
+			case 1:
+				tmp = -MathHelper.Pi;
+				break;
+			case 2:
+				tmp = -MathHelper.ThreePiOver2;
+				break;
+			case 3:
+				tmp = -MathHelper.TwoPi;
+				break;
+			}
+
+			Animation.StartAnimation(new FloatAnimation (this, "Angle", tmp, 0.4f));
 
 			if (pcr != this) {
 				//dxdy rotation if liked
