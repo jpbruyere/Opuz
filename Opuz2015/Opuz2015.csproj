@@ -42,21 +42,32 @@
     <Reference Include="golib">
       <HintPath>..\..\GOLib\bin\Release\golib.dll</HintPath>
     </Reference>
-    <Reference Include="GGL">
-      <HintPath>..\..\Magic3D\GGL\bin\GGL.dll</HintPath>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="main.cs" />
     <Compile Include="Piece.cs" />
     <Compile Include="Puzzle.cs" />
     <Compile Include="Cut.cs" />
+    <Compile Include="shaders\PuzzleShader.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="shaders\" />
+    <Folder Include="ui\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="shaders\puzzle.frag" />
     <EmbeddedResource Include="shaders\puzzle.vert" />
+    <EmbeddedResource Include="shaders\Border.frag" />
+    <EmbeddedResource Include="ui\fps.goml" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\Magic3D\GGL\GGL.csproj">
+      <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
+      <Name>GGL</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\..\Magic3D\MiscUtil\MiscUtil.csproj">
+      <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
+      <Name>MiscUtil</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

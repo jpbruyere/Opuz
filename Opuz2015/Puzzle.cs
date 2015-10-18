@@ -40,6 +40,9 @@ namespace Opuz2015
 
 
 		public Piece[,] Pieces {get;set;}
+		public List<Piece> ZOrderedPieces;
+
+		public object Mutex = new object();
 
 		public Texture Image;
 
@@ -73,13 +76,14 @@ namespace Opuz2015
 			}
 		}
 		public double TolerancePlacementPieces {
-			get { return (largP + hautP) / 20; }
+			get { return (largP + hautP) / 30; }
 		}
 
 
 		private int _nbPieceX = 5;
 		private int _nbPieceY = 3;
 
+		#region VAO
 		int vaoHandle,
 		positionVboHandle,
 		normalsVboHandle,
@@ -88,164 +92,7 @@ namespace Opuz2015
 		public Vector3[] positions;
 		public Vector3[] normals;
 		public Vector2[] texCoords;
-
 		public int[] indices;
-
-		#region CTOR
-		public Puzzle ()
-		{
-			Image = new Texture (@"/mnt/data/Images/00.jpg", true);
-
-			List<Vector3> tmp = new List<Vector3>();
-
-			Vector3[] HBorder = MakeHorizontalBorder (nbPieceX, largP);
-			Vector3[] VBorder = MakeHorizontalBorder (nbPieceY, hautP);
-
-			tmp.AddRange (HBorder);
-
-			for (int i = 1; i < nbPieceY; i++) {
-				Matrix4 mat = Matrix4.CreateTranslation(0, i * hautP, 0);
-				tmp.AddRange( transform (MakeHorizontalCut (nbPieceX, largP), mat));
-			}
-
-			tmp.AddRange (transform (HBorder, Matrix4.CreateTranslation (0, Image.Height, 0)));
-
-			Matrix4 rot = Matrix4.CreateRotationZ (MathHelper.PiOver2);
-				
-			tmp.AddRange ( transform (VBorder, rot));
-
-			for (int i = 1; i < nbPieceX; i++) {
-				Matrix4 mat = rot * Matrix4.CreateTranslation(i * largP, 0, 0);
-				tmp.AddRange( transform (MakeHorizontalCut (nbPieceY, hautP), mat));
-			}
-
-			tmp.AddRange ( transform (VBorder, 
-				rot *
-				Matrix4.CreateTranslation (Image.Width, 0, 0)));
-
-			tmp.Add(new Vector3(Image.Width,Image.Height,0));
-
-			positions = tmp.ToArray ();
-			indices = Enumerable.Range (0, tmp.Count - 1).ToArray ();
-
-			CreateVBOs ();
-			CreateVAOs ();
-
-			createPieces ();
-		}
-		#endregion
-
-		void createPieces()
-		{			
-			Pieces = new Piece[nbPieceX,nbPieceY];
-
-			int ptr0 = 0;
-			int ptr2 = nbPieceX;
-
-
-			int ptrV0 = (nbPieceY - 1) * nbPieceX * Cut.NbPoints + 2 * nbPieceX;
-
-
-			for (int y = 0; y < nbPieceY; y++) {
-				int ptr1 = ptrV0 + nbPieceY;
-
-				//int ptr1 = (nbPieceY-1) * (nbPieceX * Cut.NbPoints + 1) + 2 * (nbPieceX + 1) + nbPieceY + 1;
-				int ptr3 = ptrV0;
-				for (int x = 0; x < nbPieceX; x++) {
-					List<int> ind = new List<int>();
-
-					//indice du bord sup
-					if (y == 0) {
-						ind.Add (ptr0);
-						ptr0++;
-					} else {						
-						ind.AddRange (Enumerable.Range(ptr0, Cut.NbPoints).ToArray());
-						ptr0 += Cut.NbPoints;
-					}
-					//indice du bord droit
-					if (x == nbPieceX - 1) {
-						ind.Add (ptr1 + y);
-						ptr1++;
-					} else {						
-						ind.AddRange (Enumerable.Range(ptr1 + y * Cut.NbPoints, Cut.NbPoints).ToArray());
-						ptr1 += Cut.NbPoints * nbPieceY ;
-					}
-//
-					//indice du bord inférieur
-					if (y == nbPieceY - 1) {
-						if (x == nbPieceX - 1)
-							ind.Add (positions.Length - 1);
-						else
-							ind.Add (ptr2+1);
-						ind.Add (ptr2);
-						ptr2++;
-					} else {
-						if (x == nbPieceX - 1)
-							ind.Add (ptr1 + y);
-						else
-							ind.Add (ptr2 + Cut.NbPoints);
-						
-						ind.AddRange (Enumerable.Range(ptr2+1, Cut.NbPoints - 1).Reverse().ToArray());
-						ind.Add (ptr2);//1st point of left border
-						ptr2 += Cut.NbPoints;
-					}
-
-					//indice du bord gauche
-					if (x == 0)
-						ptr3 += nbPieceY ;
-					else if (x > 0 ) {
-//						ind.Add (ptr3 + Cut.NbPoints);
-						ind.AddRange (Enumerable.Range(ptr3+y*Cut.NbPoints+1, Cut.NbPoints-1).Reverse().ToArray());
-						ptr3 += Cut.NbPoints * nbPieceY ;
-					}
-
-					Pieces [x, y] = new Piece (this, ind);
-				}
-			}
-		}
-
-		public Piece SelectedPiece = null;
-
-
-		public void Render(){
-			GL.BindTexture(TextureTarget.Texture2D, Image);
-			GL.BindVertexArray(vaoHandle);
-			//Piece p = Pieces[4,2];
-			foreach (Piece p in Pieces)
-				p.Render ();			
-				//break;
-			//}
-			GL.BindVertexArray (0);
-			GL.BindTexture(TextureTarget.Texture2D, 0);
-		}
-
-		Vector3[] MakeHorizontalBorder (int nbCut, float cutSize){
-			Vector3[] tmp = new Vector3[nbCut];
-			for (int i = 0; i < nbCut; i++) 
-				tmp [i] = new Vector3 (i * cutSize, 0, 0);
-			return tmp;
-		}
-		Vector3[] MakeHorizontalCut (int nbCut, float cutSize){
-			List<Vector3> tmp = new List<Vector3>();
-
-			for (int i = 0; i < nbCut; i++) {
-				tmp.AddRange (new Cut (i * cutSize, cutSize).Positions);
-			}
-			//tmp.Add (new Vector3 (nbCut * cutSize, 0, 0));
-			return tmp.ToArray ();
-		}
-
-		Vector3[] transform(Vector3[] points, Matrix4 mat){
-			Vector3[] tmp = new Vector3[points.Length];
-			for (int i = 0; i < points.Length; i++) 
-				tmp [i] = Vector3.Transform (points [i], mat);
-			return tmp;
-		}
-		void transform(ref Vector3[] points, Matrix4 mat){
-			for (int i = 0; i < points.Length; i++) 
-				points [i] = Vector3.Transform (points [i], mat);			
-		}
-
 
 		void CreateVBOs()
 		{
@@ -294,6 +141,211 @@ namespace Opuz2015
 			}
 			GL.BindVertexArray(0);
 		}
+		#endregion
+
+		#region CTOR
+		public Puzzle (int _nbx, int _nby, string _imgPath)
+		{
+			Image = new Texture (_imgPath, true);
+			nbPieceX = _nbx;
+			nbPieceY = _nby;
+
+			List<Vector3> tmp = new List<Vector3>();
+
+			Vector3[] HBorder = MakeHorizontalBorder (nbPieceX, largP);
+			Vector3[] VBorder = MakeHorizontalBorder (nbPieceY, hautP);
+
+			tmp.AddRange (HBorder);
+
+			for (int i = 1; i < nbPieceY; i++) {
+				Matrix4 mat = Matrix4.CreateTranslation(0, i * hautP, 0);
+				tmp.AddRange( transform (MakeHorizontalCut (nbPieceX, largP), mat));
+			}
+
+			tmp.AddRange (transform (HBorder, Matrix4.CreateTranslation (0, Image.Height, 0)));
+
+			Matrix4 rot = Matrix4.CreateRotationZ (MathHelper.PiOver2);
+				
+			tmp.AddRange ( transform (VBorder, rot));
+
+			for (int i = 1; i < nbPieceX; i++) {
+				Matrix4 mat = rot * Matrix4.CreateTranslation(i * largP, 0, 0);
+				tmp.AddRange( transform (MakeHorizontalCut (nbPieceY, hautP), mat));
+			}
+
+			tmp.AddRange ( transform (VBorder, 
+				rot *
+				Matrix4.CreateTranslation (Image.Width, 0, 0)));
+
+			tmp.Add(new Vector3(Image.Width,Image.Height,0));
+
+			positions = tmp.ToArray ();
+			indices = Enumerable.Range (0, tmp.Count - 1).ToArray ();
+
+			CreateVBOs ();
+			CreateVAOs ();
+
+			createPieces ();
+		}
+		#endregion
+
+
+		public Piece SelectedPiece = null;
+
+		static Random rnd = new Random();
+		public void Shuffle()
+		{
+			double hw = (double)Image.Width / 2.0;
+			double hh = (double)Image.Height / 2.0;
+
+			foreach (Piece p in Pieces) {
+				p.IsLinked = Enumerable.Repeat(false,4).ToArray();
+				p.Dx = (float)(rnd.NextDouble () * (double)Image.Width - hw);
+				p.Dy = (float)(rnd.NextDouble () * (double)Image.Height - hh);
+				p.Angle = (float)-rnd.Next (0, 3) * MathHelper.PiOver2;
+			}
+			lock(Mutex)
+				ZOrderedPieces.Shuffle ();
+		}
+
+		void resetLinkedPce()
+		{}
+
+		public void Render(){
+			GL.BindTexture(TextureTarget.Texture2D, Image);
+			GL.BindVertexArray(vaoHandle);
+			//Piece p = Pieces[4,2];
+			Piece[] tmp = null;
+			lock (Mutex) {
+				//Piece[] tmp = new Piece[ZOrderedPieces.Count];
+				tmp = ZOrderedPieces.ToArray();
+				//Array.Copy (ZOrderedPieces, tmp, tmp.Length);
+			}
+
+			foreach (Piece p in tmp)
+				p.Render ();			
+				//break;
+			//}
+			GL.BindVertexArray (0);
+			GL.BindTexture(TextureTarget.Texture2D, 0);
+		}
+
+		#region Cutting
+		void createPieces()
+		{			
+			Pieces = new Piece[nbPieceX,nbPieceY];
+
+			int ptr0 = 0;
+			int ptr2 = nbPieceX;
+
+
+			int ptrV0 = (nbPieceY - 1) * nbPieceX * Cut.NbPoints + 2 * nbPieceX;
+
+
+			for (int y = 0; y < nbPieceY; y++) {
+				int ptr1 = ptrV0 + nbPieceY;
+
+				//int ptr1 = (nbPieceY-1) * (nbPieceX * Cut.NbPoints + 1) + 2 * (nbPieceX + 1) + nbPieceY + 1;
+				int ptr3 = ptrV0;
+				for (int x = 0; x < nbPieceX; x++) {
+					List<int> ind = new List<int>();
+
+					//indice du bord sup
+					if (y == 0) {
+						ind.Add (ptr0);
+						ptr0++;
+					} else {						
+						ind.AddRange (Enumerable.Range(ptr0, Cut.NbPoints).ToArray());
+						ptr0 += Cut.NbPoints;
+					}
+					//indice du bord droit
+					if (x == nbPieceX - 1) {
+						ind.Add (ptr1 + y);
+						ptr1++;
+					} else {						
+						ind.AddRange (Enumerable.Range(ptr1 + y * Cut.NbPoints, Cut.NbPoints).ToArray());
+						ptr1 += Cut.NbPoints * nbPieceY ;
+					}
+					//
+					//indice du bord inférieur
+					if (y == nbPieceY - 1) {
+						if (x == nbPieceX - 1)
+							ind.Add (positions.Length - 1);
+						else
+							ind.Add (ptr2+1);
+						ind.Add (ptr2);
+						ptr2++;
+					} else {
+						if (x == nbPieceX - 1)
+							ind.Add (ptr1 + y);
+						else
+							ind.Add (ptr2 + Cut.NbPoints);
+
+						ind.AddRange (Enumerable.Range(ptr2+1, Cut.NbPoints - 1).Reverse().ToArray());
+						ind.Add (ptr2);//1st point of left border
+						ptr2 += Cut.NbPoints;
+					}
+
+					//indice du bord gauche
+					if (x == 0)
+						ptr3 += nbPieceY ;
+					else if (x > 0 ) {
+						//						ind.Add (ptr3 + Cut.NbPoints);
+						ind.AddRange (Enumerable.Range(ptr3+y*Cut.NbPoints+1, Cut.NbPoints-1).Reverse().ToArray());
+						ptr3 += Cut.NbPoints * nbPieceY ;
+					}
+
+					Pieces [x, y] = new Piece (this, ind);
+				}
+			}
+			//init neighbourhoud and zordered list
+			ZOrderedPieces = new List<Piece>();
+			for (int y = 0; y < nbPieceY; y++) {
+				for (int x = 0; x < nbPieceX; x++) {
+					Piece p = Pieces [x, y];
+					lock(Mutex)
+						ZOrderedPieces.Add (p);
+					if (y < nbPieceY - 1)
+						p.Neighbours [0] = Pieces [x, y + 1];
+					if (x < nbPieceX - 1)
+						p.Neighbours [1] = Pieces [x + 1, y];
+					if (y > 0)
+						p.Neighbours [2] = Pieces [x, y - 1];
+					if (x > 0)
+						p.Neighbours [3] = Pieces [x - 1, y];
+				}
+			}
+		}
+
+		Vector3[] MakeHorizontalBorder (int nbCut, float cutSize){
+			Vector3[] tmp = new Vector3[nbCut];
+			for (int i = 0; i < nbCut; i++) 
+				tmp [i] = new Vector3 (i * cutSize, 0, 0);
+			return tmp;
+		}
+		Vector3[] MakeHorizontalCut (int nbCut, float cutSize){
+			List<Vector3> tmp = new List<Vector3>();
+
+			for (int i = 0; i < nbCut; i++) {
+				tmp.AddRange (new Cut (i * cutSize, cutSize).Positions);
+			}
+			//tmp.Add (new Vector3 (nbCut * cutSize, 0, 0));
+			return tmp.ToArray ();
+		}
+		Vector3[] transform(Vector3[] points, Matrix4 mat){
+			Vector3[] tmp = new Vector3[points.Length];
+			for (int i = 0; i < points.Length; i++) 
+				tmp [i] = Vector3.Transform (points [i], mat);
+			return tmp;
+		}
+		void transform(ref Vector3[] points, Matrix4 mat){
+			for (int i = 0; i < points.Length; i++) 
+				points [i] = Vector3.Transform (points [i], mat);			
+		}
+		#endregion
+
+
+
 
 		#region IDisposable implementation
 		public void Dispose ()
@@ -302,6 +354,7 @@ namespace Opuz2015
 			GL.DeleteBuffer (normalsVboHandle);
 			GL.DeleteBuffer (texVboHandle);
 			GL.DeleteVertexArray (vaoHandle);
+			GL.DeleteTexture (Image);
 		}
 		#endregion
 	}

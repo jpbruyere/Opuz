@@ -1,0 +1,22 @@
+﻿<?xml version="1.0"?>
+<Border Width="100" Height="-1" Background="0,5;0,5;0,5;0,5"
+		HorizontalAlignment="Right" VerticalAlignment="Bottom">
+	<VerticalStack Fit="true" Margin="15" Spacing="4" >
+		<HorizontalStack Fit="true">
+			<Label Text="Update:" />
+			<Label Text="{update}" Background="DarkGreen"/>
+		</HorizontalStack>
+		<HorizontalStack Fit="true" Background="0;0;0,2;0,5" >
+			<Label Text="Fps:" />
+			<Label Text="{fps}" Font="droid bold, 12" Background="AoEnglish"/>
+		</HorizontalStack>
+		<HorizontalStack Fit="true" Background="0;0;0,2;0,5">
+			<Label Text="Min:" Width = "30" />
+			<Label Text="{fpsMin}" Font="droid bold, 12" Background="AoEnglish"/>
+		</HorizontalStack>
+		<HorizontalStack Fit="true" Background="0;0;0,2;0,5" >
+			<Label Text="Max:" Width = "30"/>
+			<Label Text="{fpsMax}" Font="droid bold, 12" Background="AoEnglish"/>
+		</HorizontalStack>
+	</VerticalStack>				
+</Border>

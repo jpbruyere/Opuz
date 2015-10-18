@@ -67,13 +67,13 @@ namespace Opuz2015
 		public static int[] viewport = new int[4];
 
 		//public static Vector3 vEye = new Vector3(150.0f, 50.0f, 1.5f);    // Camera Position
-		public static Vector3 vEye = new Vector3(500.0f, -100.0f, 1400.0f);    // Camera Position
-		public static Vector3 vEyeTarget = new Vector3(500, 330, 0f);
+		public static Vector3 vEye = new Vector3(0.0f, -200.0f, 1400.0f);    // Camera Position
+		public static Vector3 vEyeTarget = new Vector3(0, 100, 0f);
 		public static Vector3 vLook = new Vector3(0.5f, 0.5f, -0.5f);  // Camera vLook Vector
 		public static Vector4 vLight = new Vector4 (-5.0f, -5.0f, 25.0f, 0.0f);
 		public static Vector3 vMouse = Vector3.Zero;
 
-		float _zFar = 20000.0f;
+		float _zFar = 6000.0f;
 
 		public float zFar {
 			get { return _zFar; }
@@ -82,14 +82,14 @@ namespace Opuz2015
 			}
 		}
 
-		public float zNear = 0.001f;
+		public float zNear = 1.0f;
 		public float fovY = (float)Math.PI / 4;
 
 		float MoveSpeed = 100.0f;
 		float RotationSpeed = 0.02f;
 		#endregion
 
-		public static GameLib.Shader mainShader;
+		public static PuzzleShader mainShader;
 		public static GameLib.EffectShader redShader;
 
 		public void ActivateMainShader()
@@ -97,6 +97,7 @@ namespace Opuz2015
 			mainShader.Enable ();
 			//shader.LineWidth = lineWidth;
 			mainShader.Color = Color.White;
+			mainShader.ImgSize = new Vector2 (puzzle.Image.Width, puzzle.Image.Height);
 
 			//mainShader.LightPos = vLight;
 			mainShader.ProjectionMatrix = projection;
@@ -123,8 +124,8 @@ namespace Opuz2015
 			vLook = vEyeTarget - vEye;
 
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
-			GL.Enable(EnableCap.DepthTest);
-			GL.DepthFunc(DepthFunction.Less);
+//			GL.Enable(EnableCap.DepthTest);
+//			GL.DepthFunc(DepthFunction.Less);
 			//GL.Enable(EnableCap.CullFace);
 
 			GL.PrimitiveRestartIndex (int.MaxValue);
@@ -132,20 +133,20 @@ namespace Opuz2015
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
-			mainShader = new GameLib.Shader (
-				"Opuz2015.shaders.puzzle.vert",
-				"Opuz2015.shaders.puzzle.frag");
+			mainShader = new PuzzleShader();
 			
-			redShader = new GameLib.EffectShader ("GGL.Shaders.GameLib.red");
+			redShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 
-			puzzle = new Puzzle ();
+			puzzle = new Puzzle (5,3,@"/mnt/data/Images/00.jpg");
 
-			puzzle.Pieces [0, 0].Move(-10, -10);
-			//puzzle.Pieces [1, 1].Move (-100, -100);
-			puzzle.Pieces [1, 1].Rotate();
-
+//			puzzle.Pieces [0, 0].IsLinked [1] = true;
+//			puzzle.Pieces [1, 0].IsLinked [3] = true;
+//			puzzle.Pieces [0, 0].Move(-10, -10);
+//			//puzzle.Pieces [1, 1].Move (-100, -100);
+//			puzzle.Pieces [1, 1].Rotate();
+			puzzle.Shuffle();
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");			
 		}
@@ -167,9 +168,9 @@ namespace Opuz2015
 			redShader.ModelMatrix = puzzle.SelectedPiece.Transformations;
 
 			GL.PointSize (2f);
-			GL.Disable (EnableCap.DepthTest);
+			//GL.Disable (EnableCap.DepthTest);
 			selMesh.Render (PrimitiveType.TriangleStrip);
-			GL.Enable (EnableCap.DepthTest);
+			//GL.Enable (EnableCap.DepthTest);
 			GL.UseProgram (0);
 
 			//renderArrow ();
@@ -183,6 +184,9 @@ namespace Opuz2015
 			Mouse.Move += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
 			Mouse.ButtonDown += Mouse_ButtonDown;
 			Mouse.ButtonUp += Mouse_ButtonUp;
+
+			LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
+
 
 			initOpenGL ();
 		}
@@ -272,7 +276,7 @@ namespace Opuz2015
 			vEyeTarget += v;
 		}
 		#endregion
-
+		const float zSelPce = 2.0f;
 		#region Mouse
 		void Mouse_ButtonDown (object sender, MouseButtonEventArgs e)
 		{
@@ -281,21 +285,32 @@ namespace Opuz2015
 			if (e.Button == MouseButton.Left) {
 				Point<float> mPos = new Point<float> (e.X, e.Y);
 				mPos.Y = viewport [3] - mPos.Y;
-				foreach (Piece p in puzzle.Pieces) {
+				Piece[] tmp = null;
+				lock (puzzle.Mutex) {
+					//Piece[] tmp = new Piece[ZOrderedPieces.Count];
+					tmp = puzzle.ZOrderedPieces.ToArray();
+					//Array.Copy (ZOrderedPieces, tmp, tmp.Length);
+				}
+				for (int i = tmp.Length-1; i >= 0; i--) {					
+					Piece p = tmp [i];
 					if (p.MouseIsIn (mPos)) {
-						this.CursorVisible = false;
+						//this.CursorVisible = false;
 						puzzle.SelectedPiece = p;
+						p.ResetVisitedStatus ();
+						p.PutOnTop ();
 						Point<float> c = p.Bounds.Center;
 						//selMesh = new vaoMesh (c.X, c.Y, 15f, 50f, 50f);
-						selMesh = new vaoMesh (c.X, c.Y, 15f, p.Bounds.Width, p.Bounds.Height);
-						p.Move (0f, 0f, 15f);
+						selMesh = new vaoMesh (c.X, c.Y, 0f, p.Bounds.Width, p.Bounds.Height);
+						p.ResetVisitedStatus ();
+						p.Move (0f, 0f, zSelPce);
 						break;
 					}
 				}
 			} else if (e.Button == MouseButton.Right) {
 				if (puzzle.SelectedPiece == null)
 					return;
-				puzzle.SelectedPiece.Rotate ();
+				puzzle.SelectedPiece.ResetVisitedStatus ();
+				puzzle.SelectedPiece.Rotate (puzzle.SelectedPiece);
 			}
 
 		}
@@ -303,29 +318,38 @@ namespace Opuz2015
 		{			
 			if (puzzle.SelectedPiece == null || e.Button != MouseButton.Left)
 				return;
-			this.CursorVisible = true;
-			puzzle.SelectedPiece.Move (0f, 0f, -15f);
+			//this.CursorVisible = true;
+			puzzle.SelectedPiece.ResetVisitedStatus ();
+			puzzle.SelectedPiece.Move (0f, 0f, -zSelPce);
 			selMesh.Dispose ();
 			selMesh = null;
+			puzzle.SelectedPiece.ResetVisitedStatus ();
+			puzzle.SelectedPiece.Test ();
 			puzzle.SelectedPiece = null;
 		}
 
 		void Mouse_Move(object sender, MouseMoveEventArgs e)
 		{
+			
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
-					vEye = Vector3.Transform (vEye, 
+					Vector3 tmp = Vector3.Transform (vEye, 
 						Matrix4.CreateTranslation (-vEyeTarget) *
 						Matrix4.CreateRotationX (-e.YDelta * RotationSpeed) *
 						Matrix4.CreateTranslation (vEyeTarget));
-
+					if (tmp.Y >= vEyeTarget.Y || tmp.Z < 0f)
+						return;
+					vEye = tmp;
 					UpdateViewMatrix ();
 					return;
 				}
 				if (e.Mouse.LeftButton == ButtonState.Pressed) {
 					if (puzzle.SelectedPiece != null) {
-						puzzle.SelectedPiece.Move ((float)e.XDelta, -(float)e.YDelta);
+						
+						Piece p = puzzle.SelectedPiece;
+						p.ResetVisitedStatus ();
+						p.Move ((float)e.XDelta * vEye.Z*0.003f, -(float)e.YDelta* vEye.Z*0.003f);
 						return;
 					}
 				}
@@ -352,7 +376,10 @@ namespace Opuz2015
 			else if (Keyboard[Key.ControlLeft])
 				speed *= 20.0f;
 
-			vEye += vLook * e.Delta * speed;
+			Vector3 tmp = vEye + vLook * e.Delta * speed;
+			if (tmp.Z < 0)
+				return;
+			vEye = tmp;
 			//vLook.Z += e.Delta * 0.1f;
 			UpdateViewMatrix();
 		}

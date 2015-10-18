@@ -38,6 +38,9 @@ namespace Opuz2015
 			IndBorder = _indicesBorder.ToArray ();
 			IndFill = earTriangulation(_indicesBorder);
 			computeBounds ();
+
+			IsLinked = Enumerable.Repeat(false,4).ToArray();
+			Neighbours = new Piece[4];
 		}
 		#endregion
 
@@ -61,7 +64,7 @@ namespace Opuz2015
 					transformations = 
 						Matrix4.CreateTranslation (-c.X, -c.Y, 0) *
 					Matrix4.CreateRotationZ (angle) *
-					Matrix4.CreateTranslation (c.X, c.Y, 0) *
+					//Matrix4.CreateTranslation (c.X, c.Y, 0) *
 					Matrix4.CreateTranslation(dx, dy, dz);
 					transformationsAreUpToDate = true;
 				}
@@ -75,28 +78,147 @@ namespace Opuz2015
 				transformationsAreUpToDate = false;
 			}
 		}
+		public bool[] IsLinked;
+		public Piece[] Neighbours;
+		public bool Visited = false;
 
-		public bool MouseIsIn(Point<float> m)
-		{
-			Rectangle<float> r = getProjectedBounds ();
-			return r.ContainsOrIsEqual (m);
+		public float Dx 
+		{ 
+			get { return dx; }
+			set {
+				dx = value;
+				transformationsAreUpToDate = false;
+			}
 		}
+		public float Dy 
+		{ 
+			get { return dy; }
+			set {
+				dy = value;
+				transformationsAreUpToDate = false;
+			}
+		}
+
 		#endregion
 
 		#region Public Functions
-		public void Rotate()
+		public void Rotate(Piece pcr)
 		{
-			if (Angle == MathHelper.ThreePiOver2)
+			if (Visited)
+				return;
+			Visited = true;
+
+			if (Angle == -MathHelper.ThreePiOver2)
 				Angle = 0f;
 			else
-				Angle += MathHelper.PiOver2;
+				Angle -= MathHelper.PiOver2;
+
+			if (pcr != this) {
+				//dxdy rotation if liked
+				Point<float> pcrc = pcr.Bounds.Center;
+				Point<float> c = Bounds.Center;
+				Point<float> dc = c - pcrc;
+//				Vector3 rotatedCxCy = Vector3.Transform (new Vector3 (dc.X, dc.Y, 0),					
+//					Matrix4.CreateRotationZ (-MathHelper.PiOver2));
+					//Matrix4.CreateTranslation (pcrc.X, pcrc.Y, 0));
+				Vector3 rotatedDxDy = Vector3.Transform (new Vector3 (Dx, Dy, 0),
+										Matrix4.CreateTranslation (-pcr.Dx, -pcr.Dy, 0) *
+					                    Matrix4.CreateRotationZ (-MathHelper.PiOver2) *
+										Matrix4.CreateTranslation (pcr.Dx, pcr.Dy, 0));
+				Dx = rotatedDxDy.X ;
+				Dy = rotatedDxDy.Y ;
+			}
+			for (int i = 0; i < IsLinked.Length; i++) {
+				if (!IsLinked [i])
+					continue;
+				Neighbours [i].Rotate(pcr);
+			}
 		}
 		public void Move(float _dispX, float _dispY, float _dispZ = 0f){
+			if (Visited)
+				return;
+			Visited = true;
+
 			dx += _dispX;
 			dy += _dispY;
 			dz += _dispZ;
 
+			for (int i = 0; i < IsLinked.Length; i++) {
+				if (!IsLinked [i])
+					continue;
+				Neighbours [i].Move (_dispX, _dispY, _dispZ);
+			}
+
 			transformationsAreUpToDate = false;
+		}
+		public void PutOnTop()
+		{
+			if (Visited)
+				return;
+			Visited = true;
+
+			lock (puzzle.Mutex) {
+				puzzle.ZOrderedPieces.Remove (this);
+				puzzle.ZOrderedPieces.Add(this);
+			}
+			for (int i = 0; i < IsLinked.Length; i++) {
+				if (!IsLinked [i])
+					continue;
+				Neighbours [i].PutOnTop();
+			}
+		}
+		public void Test(){
+			if (Visited)
+				return;
+			Visited = true;
+			for (int i = 0; i < IsLinked.Length; i++) {
+				if (IsLinked [i])
+					Neighbours [i].Test ();
+				else if (!testProximity (i))
+					continue;
+				IsLinked [i] = true;
+				Piece p = Neighbours [i];
+				p.ResetVisitedStatus ();
+				Point<float> cDelta = Bounds.Center - p.Bounds.Center;
+				p.Move (Dx - p.Dx -cDelta.X, Dy - p.Dy- cDelta.Y);
+				p.IsLinked[opositePce(i)] = true;
+
+			}
+		}
+		public void ResetVisitedStatus()
+		{
+			if (!Visited)
+				return;
+			Visited = false;
+			for (int i = 0; i < IsLinked.Length; i++) {
+				if (IsLinked [i])
+					Neighbours [i].ResetVisitedStatus();
+			}
+		}
+
+		int opositePce(int i)
+		{
+			return (i + 2) % 4;			
+		}
+		bool testProximity(int n)
+		{
+			Piece p = Neighbours [n];
+			if (p == null)
+				return false;
+			if (Angle != p.Angle)
+				return false;
+
+//			Point<float> c = Bounds.Center;
+//			Vector3 rotatedDxDy = Vector3.Transform(new Vector3(p.Dx,p.Dy,0),
+//				Matrix4.CreateTranslation (c.X, c.Y, 0) *
+//				Matrix4.CreateRotationZ (angle) *
+//				Matrix4.CreateTranslation (-c.X, -c.Y, 0));
+			Point<float> cDelta = Bounds.Center - p.Bounds.Center;
+			if (
+				Math.Abs (Dx - p.Dx-cDelta.X) < puzzle.TolerancePlacementPieces &&
+				Math.Abs (Dy - p.Dy-cDelta.Y) < puzzle.TolerancePlacementPieces)
+				return true;
+			return false;
 		}
 
 		public void Render(){
@@ -113,7 +235,14 @@ namespace Opuz2015
 		}
 		#endregion
 
-		public Rectangle<float> getProjectedBounds()
+		#region Mouse handling
+		public bool MouseIsIn(Point<float> m)
+		{
+			Rectangle<float> r = getProjectedBounds ();
+			return r.ContainsOrIsEqual (m);
+		}
+
+		Rectangle<float> getProjectedBounds()
 		{
 			Matrix4 M = Transformations *
 			            MainWin.mainShader.ModelViewMatrix *
@@ -141,13 +270,15 @@ namespace Opuz2015
 			}
 			return projR;
 		}
+		#endregion
 
+		#region triangulation and bounds calculations
 		void computeBounds()
 		{
 			float minX = float.MaxValue,
-					maxX = float.MinValue,
-					minY = float.MaxValue,
-					maxY = float.MinValue;
+			maxX = float.MinValue,
+			minY = float.MaxValue,
+			maxY = float.MinValue;
 
 			for (int i = 0; i < IndBorder.Length; i++) {
 				Vector3 p = puzzle.positions [IndBorder [i]];
@@ -163,7 +294,6 @@ namespace Opuz2015
 			Bounds = new Rectangle<float> (minX, minY, maxX - minX, maxY - minY);
 		}
 
-		#region triangulation
 		int[] earTriangulation(List<int> tril)
 		{
 			Vector3[] positions = puzzle.positions;
@@ -218,12 +348,10 @@ namespace Opuz2015
 		{
 			return val < max ? val + 1 : 0;
 		}
-
 		float sign (Vector3 p1, Vector3 p2, Vector3 p3)
 		{
 			return (p1.X - p3.X) * (p2.Y - p3.Y) - (p2.X - p3.X) * (p1.Y - p3.Y);
 		}
-
 		bool PointIsInTriangle (Vector3 pt, Vector3 v1, Vector3 v2, Vector3 v3)
 		{
 			bool b1, b2, b3;
