@@ -35,7 +35,13 @@ namespace Opuz2015
 		public Piece (Puzzle _puzzle, List<int> _indicesBorder)
 		{
 			puzzle = _puzzle;
-			IndBorder = _indicesBorder.ToArray ();
+			IndProfile = _indicesBorder.ToArray ();
+			IndBorder = new int[_indicesBorder.Count*2];
+			for (int i = 0; i < _indicesBorder.Count; i++) {
+				IndBorder [i * 2] = _indicesBorder [i];
+				IndBorder [i * 2 + 1] = _indicesBorder [i] + puzzle.BorderOffset;
+			}
+
 			IndFill = earTriangulation(_indicesBorder);
 			computeBounds ();
 
@@ -56,6 +62,7 @@ namespace Opuz2015
 		#region Pubilc Properties
 		public Rectangle<float> Bounds;
 		public int[] IndBorder;
+		public int[] IndProfile;
 		public int[] IndFill;
 		public Matrix4 Transformations{
 			get {
@@ -138,7 +145,7 @@ namespace Opuz2015
 				break;
 			}
 
-			Animation.StartAnimation(new FloatAnimation (this, "Angle", tmp, 0.4f));
+			Animation.StartAnimation(new FloatAnimation (this, "Angle", tmp, 0.3f));
 
 			if (pcr != this) {
 				//dxdy rotation if liked
@@ -253,6 +260,10 @@ namespace Opuz2015
 			MainWin.mainShader.ModelMatrix = Transformations;
 			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
 				DrawElementsType.UnsignedInt, IndFill);
+			//GL.Enable (EnableCap.DepthTest);
+			GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder.Length,
+				DrawElementsType.UnsignedInt, IndBorder);
+			//GL.Disable (EnableCap.DepthTest);
 //			GL.Disable (EnableCap.DepthTest);
 //			MainWin.mainShader.Color = Color.Red;
 //			GL.DrawElements (PrimitiveType.LineLoop, IndBorder.Length,
@@ -307,8 +318,8 @@ namespace Opuz2015
 			minY = float.MaxValue,
 			maxY = float.MinValue;
 
-			for (int i = 0; i < IndBorder.Length; i++) {
-				Vector3 p = puzzle.positions [IndBorder [i]];
+			for (int i = 0; i < IndProfile.Length; i++) {
+				Vector3 p = puzzle.positions [IndProfile [i]];
 				if (p.X < minX)
 					minX = p.X;
 				if (p.X > maxX)

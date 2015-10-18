@@ -124,8 +124,8 @@ namespace Opuz2015
 			vLook = vEyeTarget - vEye;
 
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
-//			GL.Enable(EnableCap.DepthTest);
-//			GL.DepthFunc(DepthFunction.Less);
+			GL.Enable(EnableCap.DepthTest);
+			GL.DepthFunc(DepthFunction.Less);
 			//GL.Enable(EnableCap.CullFace);
 
 			GL.PrimitiveRestartIndex (int.MaxValue);
@@ -278,7 +278,7 @@ namespace Opuz2015
 			vEyeTarget += v;
 		}
 		#endregion
-		const float zSelPce = 2.0f;
+		const float zSelPce = 15.0f;
 		#region Mouse
 		void Mouse_ButtonDown (object sender, MouseButtonEventArgs e)
 		{

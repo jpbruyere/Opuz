@@ -179,8 +179,16 @@ namespace Opuz2015
 
 			tmp.Add(new Vector3(Image.Width,Image.Height,0));
 
-			positions = tmp.ToArray ();
-			indices = Enumerable.Range (0, tmp.Count - 1).ToArray ();
+			positions = new Vector3[tmp.Count*2];
+
+			Vector3[] bord = tmp.ToArray ();
+			transform (ref bord, Matrix4.CreateTranslation (0, 0, -10f));
+			BorderOffset = tmp.Count;
+
+			Array.Copy (tmp.ToArray (), 0, positions, 0, tmp.Count);
+			Array.Copy (bord, 0, positions, BorderOffset, tmp.Count);
+
+			//indices = Enumerable.Range (0, tmp.Count - 1).ToArray ();
 
 			CreateVBOs ();
 			CreateVAOs ();
@@ -188,7 +196,7 @@ namespace Opuz2015
 			createPieces ();
 		}
 		#endregion
-
+		internal int BorderOffset = 0;
 
 		public Piece SelectedPiece = null;
 
@@ -270,7 +278,7 @@ namespace Opuz2015
 					//indice du bord inférieur
 					if (y == nbPieceY - 1) {
 						if (x == nbPieceX - 1)
-							ind.Add (positions.Length - 1);
+							ind.Add (BorderOffset - 1);
 						else
 							ind.Add (ptr2+1);
 						ind.Add (ptr2);
