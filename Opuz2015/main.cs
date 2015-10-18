@@ -124,9 +124,10 @@ namespace Opuz2015
 			vLook = vEyeTarget - vEye;
 
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
-			GL.Enable(EnableCap.DepthTest);
+			//GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Less);
-			//GL.Enable(EnableCap.CullFace);
+			GL.Enable(EnableCap.CullFace);
+			GL.CullFace (CullFaceMode.Front);
 
 			GL.PrimitiveRestartIndex (int.MaxValue);
 			GL.Enable (EnableCap.PrimitiveRestart);
@@ -198,7 +199,9 @@ namespace Opuz2015
 		}
 		public override void OnRender (FrameEventArgs e)
 		{
+			GL.CullFace (CullFaceMode.Front);
 			draw ();
+			GL.CullFace (CullFaceMode.Back);
 		}
 		protected override void OnResize (EventArgs e)
 		{
@@ -278,7 +281,7 @@ namespace Opuz2015
 			vEyeTarget += v;
 		}
 		#endregion
-		const float zSelPce = 15.0f;
+		const float zSelPce = 10.0f;
 		#region Mouse
 		void Mouse_ButtonDown (object sender, MouseButtonEventArgs e)
 		{

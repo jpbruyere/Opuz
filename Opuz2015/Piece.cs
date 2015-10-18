@@ -38,8 +38,8 @@ namespace Opuz2015
 			IndProfile = _indicesBorder.ToArray ();
 			IndBorder = new int[_indicesBorder.Count*2];
 			for (int i = 0; i < _indicesBorder.Count; i++) {
-				IndBorder [i * 2] = _indicesBorder [i];
-				IndBorder [i * 2 + 1] = _indicesBorder [i] + puzzle.BorderOffset;
+				IndBorder [i * 2] = _indicesBorder [i]+ puzzle.BorderOffset;
+				IndBorder [i * 2 + 1] = _indicesBorder [i] ;
 			}
 
 			IndFill = earTriangulation(_indicesBorder);
@@ -118,34 +118,29 @@ namespace Opuz2015
 				return;
 			Visited = true;
 
-			float tmp = 0f;
-
-//			if (Angle == -MathHelper.ThreePiOver2)
-//				tmp = 0f;
-//			else
+			float target = 0f;
 			float res = Angle / MathHelper.PiOver2;
 			int nbPi = (int)Math.Floor(-res);
-			Debug.WriteLine (res);
 
 			if (res % 1 != 0)
 				nbPi++;
 			
 			switch (nbPi) {
 			case 0:
-				tmp = -MathHelper.PiOver2;
+				target = -MathHelper.PiOver2;
 				break;
 			case 1:
-				tmp = -MathHelper.Pi;
+				target = -MathHelper.Pi;
 				break;
 			case 2:
-				tmp = -MathHelper.ThreePiOver2;
+				target = -MathHelper.ThreePiOver2;
 				break;
 			case 3:
-				tmp = -MathHelper.TwoPi;
+				target = -MathHelper.TwoPi;
 				break;
 			}
 
-			Animation.StartAnimation(new FloatAnimation (this, "Angle", tmp, 0.3f));
+			Animation.StartAnimation(new FloatAnimation (this, "Angle", target, 0.3f));
 
 			if (pcr != this) {
 				//dxdy rotation if liked

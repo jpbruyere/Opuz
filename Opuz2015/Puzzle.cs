@@ -182,7 +182,7 @@ namespace Opuz2015
 			positions = new Vector3[tmp.Count*2];
 
 			Vector3[] bord = tmp.ToArray ();
-			transform (ref bord, Matrix4.CreateTranslation (0, 0, -10f));
+			transform (ref bord, Matrix4.CreateTranslation (0, 0, -4f));
 			BorderOffset = tmp.Count;
 
 			Array.Copy (tmp.ToArray (), 0, positions, 0, tmp.Count);
