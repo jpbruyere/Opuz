@@ -99,7 +99,7 @@ namespace Opuz2015
 
 		int nbPceX = 5;
 		int nbPceY = 3;
-		string imagePath = "#Opuz2015.Images.00.jpg";
+		string imagePath = "#Opuz2015.Images.1.jpg";
 
 		public int NbPceX {
 			get {

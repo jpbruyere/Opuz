@@ -62,7 +62,9 @@
     <EmbeddedResource Include="ui\fps.goml" />
     <EmbeddedResource Include="ui\MainMenu.goml" />
     <EmbeddedResource Include="ui\Finished.goml" />
-    <EmbeddedResource Include="Images\00.jpg" />
+    <EmbeddedResource Include="ui\MainMenu %28copier%29.goml" />
+    <EmbeddedResource Include="Images\0.jpg" />
+    <EmbeddedResource Include="Images\1.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Magic3D\GGL\GGL.csproj">
