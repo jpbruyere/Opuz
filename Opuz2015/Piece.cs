@@ -80,11 +80,27 @@ namespace Opuz2015
 		}
 		public float Angle {
 			get { return angle; }
-			set {	
+			set {
+				//rotate dx and dy by difference
+				float deltaAngle = value - angle;
+				if (rotationRef != this && rotationRef != null) {
+					//dxdy rotation if liked
+					//				Vector3 rotatedCxCy = Vector3.Transform (new Vector3 (dc.X, dc.Y, 0),					
+					//					Matrix4.CreateRotationZ (-MathHelper.PiOver2));
+					//Matrix4.CreateTranslation (pcrc.X, pcrc.Y, 0));
+					Vector3 rotatedDxDy = Vector3.Transform (new Vector3 (Dx, Dy, 0),
+						Matrix4.CreateTranslation (-rotationRef.Dx, -rotationRef.Dy, 0) *
+						Matrix4.CreateRotationZ (deltaAngle) *
+						Matrix4.CreateTranslation (rotationRef.Dx, rotationRef.Dy, 0));
+					Dx = rotatedDxDy.X ;
+					Dy = rotatedDxDy.Y ;
+				}
+
 				if (value == -MathHelper.TwoPi)
 					angle = 0f;
 				else
 					angle = value;
+				
 				transformationsAreUpToDate = false;
 			}
 		}
@@ -112,6 +128,8 @@ namespace Opuz2015
 		#endregion
 
 		#region Public Functions
+		Piece rotationRef = null;
+
 		public void Rotate(Piece pcr)
 		{
 			if (Visited)
@@ -140,23 +158,9 @@ namespace Opuz2015
 				break;
 			}
 
+			rotationRef = pcr;
 			Animation.StartAnimation(new FloatAnimation (this, "Angle", target, 0.3f));
 
-			if (pcr != this) {
-				//dxdy rotation if liked
-				Point<float> pcrc = pcr.Bounds.Center;
-				Point<float> c = Bounds.Center;
-				Point<float> dc = c - pcrc;
-//				Vector3 rotatedCxCy = Vector3.Transform (new Vector3 (dc.X, dc.Y, 0),					
-//					Matrix4.CreateRotationZ (-MathHelper.PiOver2));
-					//Matrix4.CreateTranslation (pcrc.X, pcrc.Y, 0));
-				Vector3 rotatedDxDy = Vector3.Transform (new Vector3 (Dx, Dy, 0),
-										Matrix4.CreateTranslation (-pcr.Dx, -pcr.Dy, 0) *
-					                    Matrix4.CreateRotationZ (-MathHelper.PiOver2) *
-										Matrix4.CreateTranslation (pcr.Dx, pcr.Dy, 0));
-				Dx = rotatedDxDy.X ;
-				Dy = rotatedDxDy.Y ;
-			}
 			for (int i = 0; i < IsLinked.Length; i++) {
 				if (!IsLinked [i])
 					continue;
@@ -196,21 +200,26 @@ namespace Opuz2015
 				Neighbours [i].PutOnTop();
 			}
 		}
-
-		//rotated delta between centers of tested pce, kept global in pce class
-		//to compute it only once.
+			
+		/// <summary>
+		/// rotated delta between centers of tested pce, kept global in pce class to compute it only once.
+		/// </summary>
 		Vector3 cDelta = Vector3.Zero;
 
 		public void Test(){
 			if (Visited)
 				return;
 			Visited = true;
+
 			for (int i = 0; i < IsLinked.Length; i++) {
 				if (IsLinked [i]) {
 					Neighbours [i].Test ();
 					continue;
-				}else if (!testProximity (i))
+				} else if (!testProximity (i)) {
+					if (Neighbours [i] != null)
+						puzzle.SomePiecesAreNotLinked = true;
 					continue;
+				}
 				IsLinked [i] = true;
 				Piece p = Neighbours [i];
 				p.ResetVisitedStatus ();
@@ -220,7 +229,7 @@ namespace Opuz2015
 			}
 		}
 		public void ResetVisitedStatus()
-		{
+		{			
 			if (!Visited)
 				return;
 			Visited = false;

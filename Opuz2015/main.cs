@@ -22,6 +22,10 @@ namespace Opuz2015
 	{
 		#region IValueChange implementation
 		public event EventHandler<ValueChangeEventArgs> ValueChanged;
+		public void NotifyValueChanged(string name, object value)
+		{
+			ValueChanged.Raise (this, new ValueChangeEventArgs (name, value));
+		}
 		#endregion
 
 		#region FPS
@@ -93,8 +97,9 @@ namespace Opuz2015
 		public static GameLib.EffectShader redShader;
 
 
-		public int nbPceX = 5;
-		public int nbPceY = 3;
+		int nbPceX = 5;
+		int nbPceY = 3;
+		string imagePath = "#Opuz2015.Images.00.jpg";
 
 		public int NbPceX {
 			get {
@@ -102,11 +107,22 @@ namespace Opuz2015
 			}
 			set {
 				nbPceX = value;
+				NotifyValueChanged ("NbPceX", nbPceX);
 			}
 		}
 		public int NbPceY {
 			get { return nbPceY; }
-			set { nbPceY = value; }
+			set { 
+				nbPceY = value;
+				NotifyValueChanged ("NbPceY", nbPceY);
+			}
+		}
+		public string ImagePath {
+			get { return imagePath; }
+			set {
+				imagePath = value;
+				NotifyValueChanged ("ImagePath", imagePath);
+			}
 		}
 
 		public void ActivateMainShader()
@@ -180,12 +196,33 @@ namespace Opuz2015
 			mainMenu.Visible = false;
 			if (puzzle != null)
 				puzzle.Dispose();
-			puzzle = new Puzzle (NbPceX, NbPceY, @"/mnt/data/Images/00.jpg");
+			puzzle = new Puzzle (NbPceX, NbPceY, ImagePath);
 			puzzle.Shuffle();
+		}
+		void onButQuitClick (object sender, MouseButtonEventArgs e){
+			closeGame ();
+
+		}
+		void onBackToMainMenu (object sender, MouseButtonEventArgs e)
+		{
+			closeCurrentPuzzle ();
+		}
+		void closeGame(){
+			if (puzzle != null)
+				puzzle.Dispose();
+			this.Quit ();
+		}
+		void closeCurrentPuzzle(){
+			finishedMessage.Visible = false;
+			mainMenu.Visible = true;
+			if (puzzle != null)
+				puzzle.Dispose();
+			puzzle = null;
 		}
 
 		Puzzle puzzle;
 		GraphicObject mainMenu = null;
+		GraphicObject finishedMessage = null;
 
 		void draw()
 		{
@@ -229,6 +266,10 @@ namespace Opuz2015
 			LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
 			mainMenu = LoadInterface("#Opuz2015.ui.MainMenu.goml");
 			mainMenu.DataSource = this;
+			finishedMessage = LoadInterface ("#Opuz2015.ui.Finished.goml");
+			finishedMessage.DataSource = this;
+			finishedMessage.Visible = false;
+
 
 			initOpenGL ();
 		}
@@ -272,9 +313,16 @@ namespace Opuz2015
 			switch (e.Key) {
 			case Key.Space:
 				break;
+			case Key.Escape:
+				if (puzzleIsReady)
+					closeCurrentPuzzle ();
+				else
+					closeGame ();
+				break;
 			}
 		}
 		vaoMesh selMesh;
+		const float zSelPce = 8.0f;
 
 		bool puzzleIsReady { get { return puzzle == null ? false : puzzle.Ready; } }
 
@@ -324,7 +372,7 @@ namespace Opuz2015
 			vEyeTarget += v;
 		}
 		#endregion
-		const float zSelPce = 8.0f;
+
 		#region Mouse
 		void Mouse_ButtonDown (object sender, MouseButtonEventArgs e)
 		{
@@ -378,7 +426,11 @@ namespace Opuz2015
 			selMesh.Dispose ();
 			selMesh = null;
 			puzzle.SelectedPiece.ResetVisitedStatus ();
+			puzzle.SomePiecesAreNotLinked = false;
 			puzzle.SelectedPiece.Test ();
+			if (!puzzle.SomePiecesAreNotLinked) {
+				finishedMessage.Visible = true;
+			}
 			//ensure newly linked pce are on top of others
 			puzzle.SelectedPiece.ResetVisitedStatus ();
 			puzzle.SelectedPiece.PutOnTop ();

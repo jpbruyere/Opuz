@@ -1,24 +1,27 @@
 ﻿<?xml version="1.0"?>
-<Border Fit="true" Background="0,5;0,5;0,7;0,7">
-	<VerticalStack Fit="true" Margin="20">
-<!--		<Label Text="Opuz" Font="Amaldemo bold, 30"/>-->
-<!--		<Label Text="Opuz" Font="Canterbury, 110" Margin="10"/>-->
-		<Label Text="Opuz" Font="RothenburgDecorative, 110" Margin="50"/>
-<!--		<Border Fit="true" Background="DimGray" CornerRadius="10">-->
-			<HorizontalStack Fit="true" Margin="5" Background="0,5;0,5;0,7;0,9" CornerRadius="10">
-	<!--			<Label Text="Piece en largeur" Font="Amaldemo, 16"/>-->
-				<Label Text="Dimensions:" Font="OrangeJuice, 26" Margin="5"/>
-				<Spinner Minimum="2" Value="{NbPceX}" ValueChanged="onNbPceXChanged"/>
-				<Label Text="x" Font="OrangeJuice, 26" Margin="5"/>
-				<Spinner Minimum="2" Value="{NbPceY}" ValueChanged="onNbPceYChanged"/>
-			</HorizontalStack>
-<!--		</Border>-->
-
-			<Button HorizontalAlignment="Right" Fit="True"
+<Border BorderWidth="2" Fit="true" Background="0,5;0,5;0,7;0,7" CornerRadius="30">
+	<VerticalStack Fit="true" Margin="20" Spacing="10">
+		<Label Text="Opuz" Font="RothenburgDecorative, 110" Margin="36"/>
+		<Border Fit="true" Margin="5" CornerRadius="10" BorderWidth="1" BorderColor="DimGray"
+				MouseEnter="{Background=BlueCrayola}"
+				MouseLeave="{Background=Transparent}">
+			<Image Width="300" Height="200" Path="{ImagePath}" Margin="5"/>
+		</Border>
+		<HorizontalStack Fit="true" Margin="5" Background="0,5;0,5;0,7;0,9" CornerRadius="10">
+			<Label Text="Dimensions:" Font="OrangeJuice, 26" Margin="5"/>
+			<Spinner Minimum="2" Value="{NbPceX}" ValueChanged="onNbPceXChanged"/>
+			<Label Text="x" Font="OrangeJuice, 26" Margin="5"/>
+			<Spinner Minimum="2" Value="{NbPceY}" ValueChanged="onNbPceYChanged"/>
+		</HorizontalStack>
+		<HorizontalStack Fit="true" Margin="5" HorizontalAlignment="Right">
+			<Button  Fit="True"
 						MouseClick="onCutPuzzle">
-				<Label Text="Start" Font="RothenburgDecorative, 30" Margin="20"/>
+				<Label Text="Start" Font="RothenburgDecorative, 30" Margin="10"/>
 			</Button>
-<!--			<Button Text="Cut" HorizontalAlignment="Right"
-				MouseClick="onCutPuzzle"/>-->
+			<Button  Fit="True"
+						MouseClick="onButQuitClick">
+				<Label Text="Quit" Font="RothenburgDecorative, 30" Margin="10"/>
+			</Button>
+		</HorizontalStack>
 	</VerticalStack>
 </Border>

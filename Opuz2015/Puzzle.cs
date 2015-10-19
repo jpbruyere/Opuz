@@ -39,6 +39,7 @@ namespace Opuz2015
 		#endregion
 
 		public volatile bool Ready = false;
+		public bool SomePiecesAreNotLinked = false;
 		public Piece[,] Pieces {get;set;}
 		public List<Piece> ZOrderedPieces;
 
@@ -146,7 +147,9 @@ namespace Opuz2015
 		#region CTOR
 		public Puzzle (int _nbx, int _nby, string _imgPath)
 		{
-			Image = new Texture (_imgPath, true);
+			
+			Image = new Texture (_imgPath);
+
 			nbPieceX = _nbx;
 			nbPieceY = _nby;
 

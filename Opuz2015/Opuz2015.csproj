@@ -53,6 +53,7 @@
   <ItemGroup>
     <Folder Include="shaders\" />
     <Folder Include="ui\" />
+    <Folder Include="Images\" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="shaders\puzzle.frag" />
@@ -60,6 +61,8 @@
     <EmbeddedResource Include="shaders\Border.frag" />
     <EmbeddedResource Include="ui\fps.goml" />
     <EmbeddedResource Include="ui\MainMenu.goml" />
+    <EmbeddedResource Include="ui\Finished.goml" />
+    <EmbeddedResource Include="Images\00.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Magic3D\GGL\GGL.csproj">

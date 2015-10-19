@@ -1,0 +1,15 @@
+﻿<?xml version="1.0"?>
+<Window Fit="true" >
+	<Template>
+		<Border Name="Content" Height="{../TemplatedHeight}" Width="{../TemplatedWidth}" 
+			BorderWidth="2" Background="0,5;0,5;0,7;0,7" CornerRadius="10"/>
+	</Template>
+	<VerticalStack Fit="true" Margin="20">
+		<Label Text="Congratulations !" Font="RothenburgDecorative, 40" Margin="10"/>
+			<Button HorizontalAlignment="Right" Fit="True"
+						MouseClick="onBackToMainMenu">
+				<Label Text="Main Menu" Font="RothenburgDecorative, 20" Margin="10"/>
+			</Button>
+	</VerticalStack>
+
+</Window>
