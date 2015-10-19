@@ -59,6 +59,7 @@
     <EmbeddedResource Include="shaders\puzzle.vert" />
     <EmbeddedResource Include="shaders\Border.frag" />
     <EmbeddedResource Include="ui\fps.goml" />
+    <EmbeddedResource Include="ui\MainMenu.goml" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Magic3D\GGL\GGL.csproj">

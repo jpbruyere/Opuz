@@ -1,0 +1,24 @@
+﻿<?xml version="1.0"?>
+<Border Fit="true" Background="0,5;0,5;0,7;0,7">
+	<VerticalStack Fit="true" Margin="20">
+<!--		<Label Text="Opuz" Font="Amaldemo bold, 30"/>-->
+<!--		<Label Text="Opuz" Font="Canterbury, 110" Margin="10"/>-->
+		<Label Text="Opuz" Font="RothenburgDecorative, 110" Margin="50"/>
+<!--		<Border Fit="true" Background="DimGray" CornerRadius="10">-->
+			<HorizontalStack Fit="true" Margin="5" Background="0,5;0,5;0,7;0,9" CornerRadius="10">
+	<!--			<Label Text="Piece en largeur" Font="Amaldemo, 16"/>-->
+				<Label Text="Dimensions:" Font="OrangeJuice, 26" Margin="5"/>
+				<Spinner Minimum="2" Value="{NbPceX}" ValueChanged="onNbPceXChanged"/>
+				<Label Text="x" Font="OrangeJuice, 26" Margin="5"/>
+				<Spinner Minimum="2" Value="{NbPceY}" ValueChanged="onNbPceYChanged"/>
+			</HorizontalStack>
+<!--		</Border>-->
+
+			<Button HorizontalAlignment="Right" Fit="True"
+						MouseClick="onCutPuzzle">
+				<Label Text="Start" Font="RothenburgDecorative, 30" Margin="20"/>
+			</Button>
+<!--			<Button Text="Cut" HorizontalAlignment="Right"
+				MouseClick="onCutPuzzle"/>-->
+	</VerticalStack>
+</Border>

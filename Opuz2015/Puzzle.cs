@@ -38,7 +38,7 @@ namespace Opuz2015
 		}
 		#endregion
 
-
+		public volatile bool Ready = false;
 		public Piece[,] Pieces {get;set;}
 		public List<Piece> ZOrderedPieces;
 
@@ -194,6 +194,8 @@ namespace Opuz2015
 			CreateVAOs ();
 
 			createPieces ();
+
+			Ready = true;
 		}
 		#endregion
 		internal int BorderOffset = 0;

@@ -196,19 +196,24 @@ namespace Opuz2015
 				Neighbours [i].PutOnTop();
 			}
 		}
+
+		//rotated delta between centers of tested pce, kept global in pce class
+		//to compute it only once.
+		Vector3 cDelta = Vector3.Zero;
+
 		public void Test(){
 			if (Visited)
 				return;
 			Visited = true;
 			for (int i = 0; i < IsLinked.Length; i++) {
-				if (IsLinked [i])
+				if (IsLinked [i]) {
 					Neighbours [i].Test ();
-				else if (!testProximity (i))
+					continue;
+				}else if (!testProximity (i))
 					continue;
 				IsLinked [i] = true;
 				Piece p = Neighbours [i];
 				p.ResetVisitedStatus ();
-				Point<float> cDelta = Bounds.Center - p.Bounds.Center;
 				p.Move (Dx - p.Dx -cDelta.X, Dy - p.Dy- cDelta.Y);
 				p.IsLinked[opositePce(i)] = true;
 
@@ -242,7 +247,8 @@ namespace Opuz2015
 //				Matrix4.CreateTranslation (c.X, c.Y, 0) *
 //				Matrix4.CreateRotationZ (angle) *
 //				Matrix4.CreateTranslation (-c.X, -c.Y, 0));
-			Point<float> cDelta = Bounds.Center - p.Bounds.Center;
+			cDelta = Bounds.Center - p.Bounds.Center;
+			cDelta = Vector3.Transform (cDelta, Matrix4.CreateRotationZ (Angle));
 			if (
 				Math.Abs (Dx - p.Dx-cDelta.X) < puzzle.TolerancePlacementPieces &&
 				Math.Abs (Dy - p.Dy-cDelta.Y) < puzzle.TolerancePlacementPieces)

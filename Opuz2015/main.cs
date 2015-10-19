@@ -92,6 +92,23 @@ namespace Opuz2015
 		public static PuzzleShader mainShader;
 		public static GameLib.EffectShader redShader;
 
+
+		public int nbPceX = 5;
+		public int nbPceY = 3;
+
+		public int NbPceX {
+			get {
+				return nbPceX;
+			}
+			set {
+				nbPceX = value;
+			}
+		}
+		public int NbPceY {
+			get { return nbPceY; }
+			set { nbPceY = value; }
+		}
+
 		public void ActivateMainShader()
 		{
 			mainShader.Enable ();
@@ -107,17 +124,17 @@ namespace Opuz2015
 		}
 			
 
-		void renderArrow(){
-			redShader.Enable ();
-			redShader.ProjectionMatrix = projection;
-			redShader.ModelViewMatrix = modelview;
-			redShader.ModelMatrix = Matrix4.Identity;
-			GL.PointSize (2f);
-			GL.Disable (EnableCap.CullFace);
-			puzzle.Render ();
-			GL.Enable (EnableCap.CullFace);
-			redShader.Disable ();
-		}
+//		void renderArrow(){
+//			redShader.Enable ();
+//			redShader.ProjectionMatrix = projection;
+//			redShader.ModelViewMatrix = modelview;
+//			redShader.ModelMatrix = Matrix4.Identity;
+//			GL.PointSize (2f);
+//			GL.Disable (EnableCap.CullFace);
+//			puzzle.Render ();
+//			GL.Enable (EnableCap.CullFace);
+//			redShader.Disable ();
+//		}
 
 		void initOpenGL()
 		{
@@ -140,22 +157,43 @@ namespace Opuz2015
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 
-			puzzle = new Puzzle (5,3,@"/mnt/data/Images/00.jpg");
-
-//			puzzle.Pieces [0, 0].IsLinked [1] = true;
-//			puzzle.Pieces [1, 0].IsLinked [3] = true;
-//			puzzle.Pieces [0, 0].Move(-10, -10);
-//			//puzzle.Pieces [1, 1].Move (-100, -100);
-//			puzzle.Pieces [1, 1].Rotate();
-			puzzle.Shuffle();
 			ErrorCode err = GL.GetError ();
-			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");			
+			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");	
+
+		}
+
+		void onNbPceXChanged (object sender, ValueChangeEventArgs e)
+		{
+			if (e.MemberName != "Value")
+				return;
+			nbPceX = Convert.ToInt32(e.NewValue);
+		}
+		void onNbPceYChanged (object sender, ValueChangeEventArgs e)
+		{
+			if (e.MemberName != "Value")
+				return;
+			nbPceY = Convert.ToInt32(e.NewValue);
+		}
+
+		void onCutPuzzle (object sender, MouseButtonEventArgs e)
+		{
+			mainMenu.Visible = false;
+			if (puzzle != null)
+				puzzle.Dispose();
+			puzzle = new Puzzle (NbPceX, NbPceY, @"/mnt/data/Images/00.jpg");
+			puzzle.Shuffle();
 		}
 
 		Puzzle puzzle;
+		GraphicObject mainMenu = null;
 
 		void draw()
 		{
+			if (puzzle == null)
+				return;
+			if (!puzzle.Ready)
+				return;
+			
 			ActivateMainShader ();
 
 			puzzle.Render ();
@@ -181,13 +219,16 @@ namespace Opuz2015
 		{
 			base.OnLoad (e);
 
-			Mouse.WheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
-			Mouse.Move += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
-			Mouse.ButtonDown += Mouse_ButtonDown;
-			Mouse.ButtonUp += Mouse_ButtonUp;
+			//special event handlers fired only if mouse not in interface objects
+			//for scene mouse handling
+			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
+			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
+			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonDown);
+			this.MouseButtonUp += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonUp);
 
 			LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
-
+			mainMenu = LoadInterface("#Opuz2015.ui.MainMenu.goml");
+			mainMenu.DataSource = this;
 
 			initOpenGL ();
 		}
@@ -235,6 +276,8 @@ namespace Opuz2015
 		}
 		vaoMesh selMesh;
 
+		bool puzzleIsReady { get { return puzzle == null ? false : puzzle.Ready; } }
+
 		#region vLookCalculations
 		public void UpdateViewMatrix()
 		{
@@ -281,10 +324,13 @@ namespace Opuz2015
 			vEyeTarget += v;
 		}
 		#endregion
-		const float zSelPce = 10.0f;
+		const float zSelPce = 8.0f;
 		#region Mouse
 		void Mouse_ButtonDown (object sender, MouseButtonEventArgs e)
 		{
+			if (!puzzleIsReady)
+				return;
+
 			CursorVisible = true;
 
 			if (e.Button == MouseButton.Left) {
@@ -320,22 +366,29 @@ namespace Opuz2015
 
 		}
 		void Mouse_ButtonUp (object sender, MouseButtonEventArgs e)
-		{			
+		{	
+			this.CursorVisible = true;	
+			if (!puzzleIsReady)
+				return;	
 			if (puzzle.SelectedPiece == null || e.Button != MouseButton.Left)
 				return;
-			//this.CursorVisible = true;
+			
 			puzzle.SelectedPiece.ResetVisitedStatus ();
 			puzzle.SelectedPiece.Move (0f, 0f, -zSelPce);
 			selMesh.Dispose ();
 			selMesh = null;
 			puzzle.SelectedPiece.ResetVisitedStatus ();
 			puzzle.SelectedPiece.Test ();
+			//ensure newly linked pce are on top of others
+			puzzle.SelectedPiece.ResetVisitedStatus ();
+			puzzle.SelectedPiece.PutOnTop ();
 			puzzle.SelectedPiece = null;
 		}
 
 		void Mouse_Move(object sender, MouseMoveEventArgs e)
 		{
-			
+			if (!puzzleIsReady)
+				return;
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
@@ -375,6 +428,8 @@ namespace Opuz2015
 		}			
 		void Mouse_WheelChanged(object sender, MouseWheelEventArgs e)
 		{
+			if (!puzzleIsReady)
+				return;
 			float speed = MoveSpeed;
 			if (Keyboard[Key.ShiftLeft])
 				speed *= 0.1f;
