@@ -7,11 +7,10 @@ Small game developped in a couple of days to test my libraries.
 Image selector has to be implemented, and some nice effects shaders would definitively make it
 a nice game.
 
-Building
-========
+Screenshot
+==========
 
 ![Opuz](/Screenshot.png?raw=true "Opuz")
-
 
 Dependencies
 ============
