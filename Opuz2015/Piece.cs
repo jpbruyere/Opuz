@@ -225,7 +225,8 @@ namespace Opuz2015
 				p.ResetVisitedStatus ();
 				p.Move (Dx - p.Dx -cDelta.X, Dy - p.Dy- cDelta.Y);
 				p.IsLinked[opositePce(i)] = true;
-
+				p.Visited = false;
+				p.Test ();
 			}
 		}
 		public void ResetVisitedStatus()
@@ -266,13 +267,16 @@ namespace Opuz2015
 		}
 
 		public void Render(){
-			MainWin.mainShader.Color = Color.White;
+			
 			MainWin.mainShader.ModelMatrix = Transformations;
+			MainWin.mainShader.Color = Color.DimGray;
+			GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder.Length,
+				DrawElementsType.UnsignedInt, IndBorder);
+			MainWin.mainShader.Color = Color.White;
 			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
 				DrawElementsType.UnsignedInt, IndFill);
 			//GL.Enable (EnableCap.DepthTest);
-			GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder.Length,
-				DrawElementsType.UnsignedInt, IndBorder);
+
 			//GL.Disable (EnableCap.DepthTest);
 //			GL.Disable (EnableCap.DepthTest);
 //			MainWin.mainShader.Color = Color.Red;
