@@ -288,6 +288,12 @@ namespace Opuz2015
 				DrawElementsType.UnsignedInt, IndBorder);
 			
 		}
+		public void RenderProfile(){
+
+
+			GL.DrawElements (PrimitiveType.LineLoop, IndProfile.Length,
+				DrawElementsType.UnsignedInt, IndProfile);
+		}
 		#endregion
 
 		void  onColorMultAnimEnd(Animation a)

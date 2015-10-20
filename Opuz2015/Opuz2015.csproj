@@ -63,6 +63,7 @@
     <EmbeddedResource Include="ui\MainMenu.goml" />
     <EmbeddedResource Include="ui\Finished.goml" />
     <EmbeddedResource Include="ui\MainMenu %28copier%29.goml" />
+    <EmbeddedResource Include="shaders\test.frag" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Magic3D\GGL\GGL.csproj">

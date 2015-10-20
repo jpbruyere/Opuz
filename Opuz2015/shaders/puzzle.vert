@@ -12,10 +12,12 @@ in vec3 in_position;
 in vec2 in_tex;
 
 out vec2 texCoord;
+out vec3 vLight;
 
 
 void main(void)
 {	
 	texCoord = vec2(in_position) / ImgSize;
+	vLight = vec3(ModelView * vec4(-1.0,-1.0,-1.0,1.0));
 	gl_Position = Projection * ModelView * Model * vec4(in_position, 1);
 }

@@ -201,6 +201,7 @@ namespace Opuz2015
 
 			initFbo ();
 			updateFbo ();
+
 			Ready = true;
 		}
 		#endregion
@@ -237,18 +238,18 @@ namespace Opuz2015
 				tmp = ZOrderedPieces.ToArray();
 				//Array.Copy (ZOrderedPieces, tmp, tmp.Length);
 			}
-
+			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, Image);
+			GL.ActiveTexture (TextureUnit.Texture1);
+			GL.BindTexture(TextureTarget.Texture2D, tex);
 			foreach (Piece p in tmp)
 				p.RenderBorder ();			
 			foreach (Piece p in tmp)
 				p.Render ();			
-			GL.BindTexture(TextureTarget.Texture2D, tex);
-			foreach (Piece p in tmp)
-				p.Render ();			
+//			GL.BindTexture(TextureTarget.Texture2D, tex);
+//			foreach (Piece p in tmp)
+//				p.Render ();			
 
-				//break;
-			//}
 			GL.BindVertexArray (0);
 			GL.BindTexture(TextureTarget.Texture2D, 0);
 		}
@@ -407,25 +408,30 @@ namespace Opuz2015
 
 			MainWin.testShader.Enable ();
 			MainWin.testShader.ProjectionMatrix = Matrix4.CreateOrthographicOffCenter 
-				(0, Image.Width,0, Image.Height, 0, 1);
+				(0, Image.Width, 0, Image.Height, 0, 1);
 			MainWin.testShader.ModelViewMatrix = Matrix4.Identity;
 			MainWin.testShader.ModelMatrix = Matrix4.Identity;
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
 			float[] cc = new float[4];
+			int[] viewport = new int[4];
+			GL.GetInteger (GetPName.Viewport, viewport);
+			GL.Viewport (0, 0, Image.Width, Image.Height);
 			GL.GetFloat (GetPName.ColorClearValue, cc);
 			GL.ClearColor (0, 0, 0, 0);
 			GL.Clear (ClearBufferMask.ColorBufferBit);
 
 			GL.BindVertexArray(vaoHandle);
-			GL.LineWidth(10);
-			GL.DrawElements (PrimitiveType.LineStrip, indices.Length,
-				DrawElementsType.UnsignedInt, indices);
+			GL.LineWidth(3);
+			foreach (Piece p in Pieces)
+				p.RenderProfile ();
+			
 			GL.BindVertexArray (0);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 			GL.Enable (EnableCap.CullFace);
 			GL.UseProgram (0);
 			GL.ClearColor (cc[0],cc[1],cc[2],cc[3]);
+			GL.Viewport (viewport [0], viewport [1], viewport [2], viewport [3]);			
 		}
 		#endregion
 

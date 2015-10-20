@@ -95,6 +95,7 @@ namespace Opuz2015
 
 		public static PuzzleShader mainShader;
 		public static GameLib.EffectShader redShader;
+		public static GameLib.EffectShader testShader;
 
 
 		int nbPceX = 5;
@@ -125,6 +126,33 @@ namespace Opuz2015
 			}
 		}
 
+//		float[] kernel = { 	
+//			-2f, -1f, 0f,
+//			-1f,  1f, 1f,
+//			0f, 1f, 2f
+//		};
+//		Vector2[] offsets = {
+//			new Vector2(-1,-1),
+//			new Vector2( 0,-1),
+//			new Vector2( 1,-1),
+//			new Vector2(-1, 0),
+//			new Vector2( 0, 0),
+//			new Vector2( 1, 0),
+//			new Vector2(-1, 1),
+//			new Vector2( 0, 1),
+//			new Vector2( 1, 1),
+//		};
+//		float[] offsets = {
+//			-1,-1,
+//			 0,-1,
+//			 1,-1,
+//			-1, 0,
+//			 0, 0,
+//			 1, 0,
+//			-1, 1,
+//			 0, 1,
+//			 1, 1,
+//		};
 		public void ActivateMainShader()
 		{
 			mainShader.Enable ();
@@ -132,6 +160,8 @@ namespace Opuz2015
 			mainShader.Color = Color.White;
 			mainShader.ColorMultiplier = 1f;
 			mainShader.ImgSize = new Vector2 (puzzle.Image.Width, puzzle.Image.Height);
+//			mainShader.Kernel = kernel;
+//			mainShader.Offsets = offsets;
 
 			//mainShader.LightPos = vLight;
 			mainShader.ProjectionMatrix = projection;
@@ -158,6 +188,7 @@ namespace Opuz2015
 			mainShader = new PuzzleShader();
 			
 			redShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
+			testShader = new GameLib.EffectShader ("Opuz2015.shaders.test");
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 
