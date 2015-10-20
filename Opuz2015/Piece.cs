@@ -59,6 +59,8 @@ namespace Opuz2015
 		bool transformationsAreUpToDate = false;
 		Matrix4 transformations = Matrix4.Identity;
 
+		float colorMultiplier = 1f;
+
 		#region Pubilc Properties
 		public Rectangle<float> Bounds;
 		public int[] IndBorder;
@@ -70,9 +72,8 @@ namespace Opuz2015
 					Point<float> c = Bounds.Center;
 					transformations = 
 						Matrix4.CreateTranslation (-c.X, -c.Y, 0) *
-					Matrix4.CreateRotationZ (angle) *
-					//Matrix4.CreateTranslation (c.X, c.Y, 0) *
-					Matrix4.CreateTranslation(dx, dy, dz);
+						Matrix4.CreateRotationZ (angle) *					
+						Matrix4.CreateTranslation(dx, dy, dz);
 					transformationsAreUpToDate = true;
 				}
 				return transformations;
@@ -84,10 +85,6 @@ namespace Opuz2015
 				//rotate dx and dy by difference
 				float deltaAngle = value - angle;
 				if (rotationRef != this && rotationRef != null) {
-					//dxdy rotation if liked
-					//				Vector3 rotatedCxCy = Vector3.Transform (new Vector3 (dc.X, dc.Y, 0),					
-					//					Matrix4.CreateRotationZ (-MathHelper.PiOver2));
-					//Matrix4.CreateTranslation (pcrc.X, pcrc.Y, 0));
 					Vector3 rotatedDxDy = Vector3.Transform (new Vector3 (Dx, Dy, 0),
 						Matrix4.CreateTranslation (-rotationRef.Dx, -rotationRef.Dy, 0) *
 						Matrix4.CreateRotationZ (deltaAngle) *
@@ -124,7 +121,14 @@ namespace Opuz2015
 				transformationsAreUpToDate = false;
 			}
 		}
-
+		public float ColorMultiplier {
+			get {
+				return colorMultiplier;
+			}
+			set {
+				colorMultiplier = value;
+			}
+		}
 		#endregion
 
 		#region Public Functions
@@ -221,6 +225,7 @@ namespace Opuz2015
 					continue;
 				}
 				IsLinked [i] = true;
+				Animation.StartAnimation (new FloatAnimation (this, "ColorMultiplier", 2f,0.5f), 0, onColorMultAnimEnd);
 				Piece p = Neighbours [i];
 				p.ResetVisitedStatus ();
 				p.Move (Dx - p.Dx -cDelta.X, Dy - p.Dy- cDelta.Y);
@@ -229,6 +234,7 @@ namespace Opuz2015
 				p.Test ();
 			}
 		}
+			
 		public void ResetVisitedStatus()
 		{			
 			if (!Visited)
@@ -269,23 +275,25 @@ namespace Opuz2015
 		public void Render(){
 			
 			MainWin.mainShader.ModelMatrix = Transformations;
-			MainWin.mainShader.Color = Color.DimGray;
-			GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder.Length,
-				DrawElementsType.UnsignedInt, IndBorder);
+			MainWin.mainShader.ColorMultiplier = colorMultiplier;
 			MainWin.mainShader.Color = Color.White;
 			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
 				DrawElementsType.UnsignedInt, IndFill);
-			//GL.Enable (EnableCap.DepthTest);
-
-			//GL.Disable (EnableCap.DepthTest);
-//			GL.Disable (EnableCap.DepthTest);
-//			MainWin.mainShader.Color = Color.Red;
-//			GL.DrawElements (PrimitiveType.LineLoop, IndBorder.Length,
-//				DrawElementsType.UnsignedInt, IndBorder);			
-//
-//			GL.Enable (EnableCap.DepthTest);
+		}
+		public void RenderBorder(){
+			MainWin.mainShader.ModelMatrix = Transformations;
+			MainWin.mainShader.ColorMultiplier = colorMultiplier;
+			MainWin.mainShader.Color = Color.DimGray;
+			GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder.Length,
+				DrawElementsType.UnsignedInt, IndBorder);
+			
 		}
 		#endregion
+
+		void  onColorMultAnimEnd(Animation a)
+		{
+			Animation.StartAnimation (new FloatAnimation (this, "ColorMultiplier", 1f));
+		}
 
 		#region Mouse handling
 		public bool MouseIsIn(Point<float> m)

@@ -31,15 +31,20 @@ namespace Opuz2015
 			"Opuz2015.shaders.puzzle.frag")
 		{
 		}
-		protected int   imgSize;
+		protected int   imgSize, colMult;
 
 		public Vector2 ImgSize {
 			set { GL.Uniform2 (imgSize, value); }
 		}
+		public float ColorMultiplier {
+			set { GL.Uniform1 (colMult, value); }
+		}
+
 		protected override void GetUniformLocations ()
 		{
 			base.GetUniformLocations ();
 			imgSize = GL.GetUniformLocation (pgmId, "ImgSize");
+			colMult = GL.GetUniformLocation (pgmId, "colMult");
 		}
 	}
 }

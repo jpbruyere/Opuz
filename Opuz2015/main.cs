@@ -99,7 +99,7 @@ namespace Opuz2015
 
 		int nbPceX = 5;
 		int nbPceY = 3;
-		string imagePath = "#Opuz2015.Images.1.jpg";
+		string imagePath = @"Images/2.jpg";
 
 		public int NbPceX {
 			get {
@@ -130,6 +130,7 @@ namespace Opuz2015
 			mainShader.Enable ();
 			//shader.LineWidth = lineWidth;
 			mainShader.Color = Color.White;
+			mainShader.ColorMultiplier = 1f;
 			mainShader.ImgSize = new Vector2 (puzzle.Image.Width, puzzle.Image.Height);
 
 			//mainShader.LightPos = vLight;
@@ -138,19 +139,6 @@ namespace Opuz2015
 			mainShader.ModelMatrix = Matrix4.Identity;
 
 		}
-			
-
-//		void renderArrow(){
-//			redShader.Enable ();
-//			redShader.ProjectionMatrix = projection;
-//			redShader.ModelViewMatrix = modelview;
-//			redShader.ModelMatrix = Matrix4.Identity;
-//			GL.PointSize (2f);
-//			GL.Disable (EnableCap.CullFace);
-//			puzzle.Render ();
-//			GL.Enable (EnableCap.CullFace);
-//			redShader.Disable ();
-//		}
 
 		void initOpenGL()
 		{

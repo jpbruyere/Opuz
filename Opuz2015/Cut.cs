@@ -37,10 +37,10 @@ namespace Opuz2015
 
 		const int resolution = 20;
 		const float tutWidth = 0.10f;
-		const float tutWidthVariance = 0.2f;
+		const float tutWidthVariance = 0.3f;
 		const float tutHeight = 0.3f;
-		const float tutHeightVariance = 0.2f;
-		const float tutPosVariance = 0.2f;
+		const float tutHeightVariance = 0.5f;
+		const float tutPosVariance = 0.3f;
 
 		public static int NbPoints { get {return resolution + 1; }}
 

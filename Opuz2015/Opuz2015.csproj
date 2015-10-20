@@ -63,8 +63,6 @@
     <EmbeddedResource Include="ui\MainMenu.goml" />
     <EmbeddedResource Include="ui\Finished.goml" />
     <EmbeddedResource Include="ui\MainMenu %28copier%29.goml" />
-    <EmbeddedResource Include="Images\0.jpg" />
-    <EmbeddedResource Include="Images\1.jpg" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\Magic3D\GGL\GGL.csproj">
@@ -75,5 +73,16 @@
       <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
       <Name>MiscUtil</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="Images\0.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\1.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\2.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
 </Project>

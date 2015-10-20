@@ -76,6 +76,7 @@ namespace Opuz2015
 				return (float)Image.Height / nbPieceY;
 			}
 		}
+		public float PieceThickness { get { return (hautP + largP) * 0.02f; }}
 		public double TolerancePlacementPieces {
 			get { return (largP + hautP) / 30; }
 		}
@@ -185,7 +186,7 @@ namespace Opuz2015
 			positions = new Vector3[tmp.Count*2];
 
 			Vector3[] bord = tmp.ToArray ();
-			transform (ref bord, Matrix4.CreateTranslation (0, 0, -4f));
+			transform (ref bord, Matrix4.CreateTranslation (0, 0, -PieceThickness));
 			BorderOffset = tmp.Count;
 
 			Array.Copy (tmp.ToArray (), 0, positions, 0, tmp.Count);
@@ -236,7 +237,10 @@ namespace Opuz2015
 			}
 
 			foreach (Piece p in tmp)
+				p.RenderBorder ();			
+			foreach (Piece p in tmp)
 				p.Render ();			
+			
 				//break;
 			//}
 			GL.BindVertexArray (0);
