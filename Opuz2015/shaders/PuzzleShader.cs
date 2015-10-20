@@ -31,7 +31,7 @@ namespace Opuz2015
 			"Opuz2015.shaders.puzzle.frag")
 		{
 		}
-		protected int   imgSize, colMult;
+		protected int   imgSize, colMult;//, kernel, offsets;
 
 		public Vector2 ImgSize {
 			set { GL.Uniform2 (imgSize, value); }
@@ -45,6 +45,11 @@ namespace Opuz2015
 			base.GetUniformLocations ();
 			imgSize = GL.GetUniformLocation (pgmId, "ImgSize");
 			colMult = GL.GetUniformLocation (pgmId, "colMult");
+		}
+		protected override void BindSamplesSlots ()
+		{
+			base.BindSamplesSlots ();
+			GL.Uniform1(GL.GetUniformLocation (pgmId, "texBords"), 1);
 		}
 	}
 }

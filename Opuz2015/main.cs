@@ -95,11 +95,12 @@ namespace Opuz2015
 
 		public static PuzzleShader mainShader;
 		public static GameLib.EffectShader redShader;
+		public static GameLib.EffectShader testShader;
 
 
 		int nbPceX = 5;
 		int nbPceY = 3;
-		string imagePath = @"Images/2.jpg";
+		string imagePath = @"Images/0.jpg";
 
 		public int NbPceX {
 			get {
@@ -128,12 +129,9 @@ namespace Opuz2015
 		public void ActivateMainShader()
 		{
 			mainShader.Enable ();
-			//shader.LineWidth = lineWidth;
 			mainShader.Color = Color.White;
 			mainShader.ColorMultiplier = 1f;
 			mainShader.ImgSize = new Vector2 (puzzle.Image.Width, puzzle.Image.Height);
-
-			//mainShader.LightPos = vLight;
 			mainShader.ProjectionMatrix = projection;
 			mainShader.ModelViewMatrix = modelview;
 			mainShader.ModelMatrix = Matrix4.Identity;
@@ -163,6 +161,7 @@ namespace Opuz2015
 			mainShader = new PuzzleShader();
 			
 			redShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
+			testShader = new GameLib.EffectShader ("Opuz2015.shaders.red");
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 
@@ -241,8 +240,6 @@ namespace Opuz2015
 			selMesh.Render (PrimitiveType.TriangleStrip);
 			//GL.Enable (EnableCap.DepthTest);
 			GL.UseProgram (0);
-
-			//renderArrow ();
 		}
 			
 		protected override void OnLoad (EventArgs e)
@@ -305,6 +302,8 @@ namespace Opuz2015
 			base.OnKeyDown (e);
 			switch (e.Key) {
 			case Key.Space:
+				if (puzzle != null)
+					puzzle.resolve ();
 				break;
 			case Key.Escape:
 				if (puzzleIsReady)

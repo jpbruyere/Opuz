@@ -299,10 +299,8 @@ namespace Opuz2015
 			
 		}
 		public void RenderProfile(){
-			MainWin.redShader.ModelMatrix = Transformations;
 			GL.DrawElements (PrimitiveType.LineLoop, IndProfile.Length,
 				DrawElementsType.UnsignedInt, IndProfile);
-
 		}
 		#endregion
 

@@ -14,6 +14,6 @@ void main()
 		discard;*/
 
 
-	out_frag_color = vec4(sqrt(gl_FragCoord.s),0.0,0.0,sqrt(gl_FragCoord.s));
+	out_frag_color = vec4(1.0,0.0,0.0,1.0);
 }
 
