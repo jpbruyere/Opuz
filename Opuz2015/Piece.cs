@@ -121,6 +121,10 @@ namespace Opuz2015
 				transformationsAreUpToDate = false;
 			}
 		}
+		public float Dz 
+		{ 
+			get { return dz; }
+		}
 		public float ColorMultiplier {
 			get {
 				return colorMultiplier;
@@ -271,9 +275,15 @@ namespace Opuz2015
 				return true;
 			return false;
 		}
+		public void RenderShadow(){
 
+			MainWin.mainShader.ModelMatrix = Transformations * Matrix4.CreateTranslation(-puzzle.PieceThickness,-puzzle.PieceThickness,0);
+			MainWin.mainShader.ColorMultiplier = 1.0f;
+			MainWin.mainShader.Color = Color.Black;
+			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
+				DrawElementsType.UnsignedInt, IndFill);
+		}
 		public void Render(){
-			
 			MainWin.mainShader.ModelMatrix = Transformations;
 			MainWin.mainShader.ColorMultiplier = colorMultiplier;
 			MainWin.mainShader.Color = Color.White;
@@ -287,6 +297,12 @@ namespace Opuz2015
 			GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder.Length,
 				DrawElementsType.UnsignedInt, IndBorder);
 			
+		}
+		public void RenderProfile(){
+			MainWin.redShader.ModelMatrix = Transformations;
+			GL.DrawElements (PrimitiveType.LineLoop, IndProfile.Length,
+				DrawElementsType.UnsignedInt, IndProfile);
+
 		}
 		#endregion
 

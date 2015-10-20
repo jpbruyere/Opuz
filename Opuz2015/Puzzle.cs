@@ -239,10 +239,7 @@ namespace Opuz2015
 			foreach (Piece p in tmp)
 				p.RenderBorder ();			
 			foreach (Piece p in tmp)
-				p.Render ();			
-			
-				//break;
-			//}
+				p.Render ();	
 			GL.BindVertexArray (0);
 			GL.BindTexture(TextureTarget.Texture2D, 0);
 		}

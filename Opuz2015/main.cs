@@ -139,6 +139,11 @@ namespace Opuz2015
 			mainShader.ModelMatrix = Matrix4.Identity;
 
 		}
+		public static void ActivateRedShader(){
+			redShader.Enable ();
+			redShader.ProjectionMatrix = projection;
+			redShader.ModelViewMatrix = modelview;
+		}
 
 		void initOpenGL()
 		{
