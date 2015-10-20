@@ -229,6 +229,16 @@ namespace Opuz2015
 		void resetLinkedPce()
 		{}
 
+		public void resolve()
+		{
+			foreach (Piece p in Pieces ) {
+				p.Angle = 0f;
+				Point<float> c = p.Bounds.Center;
+				p.Dx = c.X;
+				p.Dy = c.Y;
+			}
+		}
+
 		public void Render(){
 			GL.BindVertexArray(vaoHandle);
 			//Piece p = Pieces[4,2];

@@ -100,7 +100,7 @@ namespace Opuz2015
 
 		int nbPceX = 5;
 		int nbPceY = 3;
-		string imagePath = @"Images/2.jpg";
+		string imagePath = @"Images/0.jpg";
 
 		public int NbPceX {
 			get {
@@ -331,6 +331,8 @@ namespace Opuz2015
 			base.OnKeyDown (e);
 			switch (e.Key) {
 			case Key.Space:
+				if (puzzle != null)
+					puzzle.resolve ();
 				break;
 			case Key.Escape:
 				if (puzzleIsReady)
