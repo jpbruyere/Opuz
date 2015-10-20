@@ -199,9 +199,12 @@ namespace Opuz2015
 
 			createPieces ();
 
+			initFbo ();
+			updateFbo ();
 			Ready = true;
 		}
 		#endregion
+
 		internal int BorderOffset = 0;
 
 		public Piece SelectedPiece = null;
@@ -226,7 +229,6 @@ namespace Opuz2015
 		{}
 
 		public void Render(){
-			GL.BindTexture(TextureTarget.Texture2D, Image);
 			GL.BindVertexArray(vaoHandle);
 			//Piece p = Pieces[4,2];
 			Piece[] tmp = null;
@@ -236,11 +238,15 @@ namespace Opuz2015
 				//Array.Copy (ZOrderedPieces, tmp, tmp.Length);
 			}
 
+			GL.BindTexture(TextureTarget.Texture2D, Image);
 			foreach (Piece p in tmp)
 				p.RenderBorder ();			
 			foreach (Piece p in tmp)
 				p.Render ();			
-			
+			GL.BindTexture(TextureTarget.Texture2D, tex);
+			foreach (Piece p in tmp)
+				p.Render ();			
+
 				//break;
 			//}
 			GL.BindVertexArray (0);
@@ -361,7 +367,67 @@ namespace Opuz2015
 		}
 		#endregion
 
+		#region FBO
+		int tex, fbo;
+		void initFbo()
+		{			
+			tex = new Texture (Image.Width, Image.Height);
+			int stride = 4 * Image.Width;
+			int bmpSize = Math.Abs (stride) * Image.Height;
+			byte[] bmp = new byte[bmpSize];
 
+			GL.ActiveTexture (TextureUnit.Texture0);
+			GL.BindTexture(TextureTarget.Texture2D, tex);
+
+			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, 
+				Image.Width, Image.Height, 0,
+				OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmp);
+
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
+			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);
+
+			GL.BindTexture(TextureTarget.Texture2D, 0);
+
+			GL.GenFramebuffers(1, out fbo);
+
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
+			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
+				TextureTarget.Texture2D, tex, 0);
+
+			if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != FramebufferErrorCode.FramebufferComplete)
+			{
+				throw new Exception(GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer).ToString());
+			}
+
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+		}
+		void updateFbo()
+		{						
+			GL.Disable (EnableCap.CullFace);
+
+			MainWin.testShader.Enable ();
+			MainWin.testShader.ProjectionMatrix = Matrix4.CreateOrthographicOffCenter 
+				(0, Image.Width,0, Image.Height, 0, 1);
+			MainWin.testShader.ModelViewMatrix = Matrix4.Identity;
+			MainWin.testShader.ModelMatrix = Matrix4.Identity;
+
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
+			float[] cc = new float[4];
+			GL.GetFloat (GetPName.ColorClearValue, cc);
+			GL.ClearColor (0, 0, 0, 0);
+			GL.Clear (ClearBufferMask.ColorBufferBit);
+
+			GL.BindVertexArray(vaoHandle);
+			GL.LineWidth(10);
+			GL.DrawElements (PrimitiveType.LineStrip, indices.Length,
+				DrawElementsType.UnsignedInt, indices);
+			GL.BindVertexArray (0);
+			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+			GL.Enable (EnableCap.CullFace);
+			GL.UseProgram (0);
+			GL.ClearColor (cc[0],cc[1],cc[2],cc[3]);
+		}
+		#endregion
 
 
 		#region IDisposable implementation
