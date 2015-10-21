@@ -39,7 +39,6 @@ namespace Opuz2015
 		#endregion
 
 		public volatile bool Ready = false;
-		public bool SomePiecesAreNotLinked = false;
 		public Piece[,] Pieces {get;set;}
 		public List<Piece> ZOrderedPieces;
 
@@ -70,7 +69,7 @@ namespace Opuz2015
 			get {
 				return (float)Image.Width / nbPieceX;
 			}
-		}					//read-only largeur piece
+		}
 		public float hautP {
 			get {
 				return (float)Image.Height / nbPieceY;
@@ -326,7 +325,7 @@ namespace Opuz2015
 					Pieces [x, y] = new Piece (this, ind);
 				}
 			}
-			//init neighbourhoud and zordered list
+			//init neighbourhoud, borders indices, and zordered list
 			ZOrderedPieces = new List<Piece>();
 			for (int y = 0; y < nbPieceY; y++) {
 				for (int x = 0; x < nbPieceX; x++) {
@@ -341,11 +340,12 @@ namespace Opuz2015
 						p.Neighbours [0] = Pieces [x, y - 1];
 					if (x > 0)
 						p.Neighbours [3] = Pieces [x - 1, y];
-					p.SetBorderIndices ();
+
+					p.ComputeBorderIndices ();
 				}
 			}
 		}
-
+		//maybe those functions should be in Cutter class
 		Vector3[] MakeHorizontalBorder (int nbCut, float cutSize){
 			Vector3[] tmp = new Vector3[nbCut];
 			for (int i = 0; i < nbCut; i++) 

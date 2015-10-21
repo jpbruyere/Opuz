@@ -440,9 +440,9 @@ namespace Opuz2015
 			selMesh.Dispose ();
 			selMesh = null;
 			puzzle.SelectedPiece.ResetVisitedStatus ();
-			puzzle.SomePiecesAreNotLinked = false;
 			puzzle.SelectedPiece.Test ();
-			if (!puzzle.SomePiecesAreNotLinked) {
+			puzzle.SelectedPiece.ResetVisitedStatus ();
+			if (puzzle.SelectedPiece.PuzzleIsFinished) {
 				finishedMessage.Visible = true;
 			}
 			//ensure newly linked pce are on top of others

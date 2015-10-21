@@ -214,15 +214,32 @@ namespace Opuz2015
 			Visited = true;
 
 			for (int i = 0; i < IsLinked.Length; i++) {
+				if (Neighbours == null)
+					continue;
 				if (IsLinked [i]) {
 					Neighbours [i].Test ();
 					continue;
-				} else if (!testProximity (i)) {
-					if (Neighbours [i] != null)
-						puzzle.SomePiecesAreNotLinked = true;
-					continue;
 				}
-				Bind (i);
+				if (testProximity (i))
+					Bind (i);
+			}
+		}
+		public bool PuzzleIsFinished
+		{
+			get { 
+				if (Visited)
+					return true;
+				Visited = true;
+
+				for (int i = 0; i < IsLinked.Length; i++) {
+					if (Neighbours [i] == null)
+						continue;
+					if (!IsLinked [i])
+						return false;
+					if (!Neighbours [i].PuzzleIsFinished)
+						return false;					
+				}
+				return true;
 			}
 		}
 
