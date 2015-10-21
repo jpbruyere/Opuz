@@ -62,8 +62,9 @@
     <EmbeddedResource Include="ui\fps.goml" />
     <EmbeddedResource Include="ui\MainMenu.goml" />
     <EmbeddedResource Include="ui\Finished.goml" />
-    <EmbeddedResource Include="ui\MainMenu %28copier%29.goml" />
     <EmbeddedResource Include="shaders\red.frag" />
+    <EmbeddedResource Include="ui\ImageSelect.goml" />
+    <EmbeddedResource Include="ui\imgItem.goml" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\0.jpg">
@@ -75,5 +76,11 @@
     <None Include="Images\2.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\GGL\GGL.csproj">
+      <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
+      <Name>GGL</Name>
+    </ProjectReference>
   </ItemGroup>
 </Project>

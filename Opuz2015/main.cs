@@ -14,6 +14,7 @@ using go;
 using System.Threading;
 using GGL;
 using System.Collections.Generic;
+using System.IO;
 
 
 namespace Opuz2015
@@ -102,6 +103,15 @@ namespace Opuz2015
 		int nbPceY = 3;
 		string imagePath = @"Images/0.jpg";
 
+		public string[] Images
+		{
+			get {
+				return Directory.GetFiles(
+					System.IO.Path.GetDirectoryName(
+						System.Reflection.Assembly.GetExecutingAssembly().Location ) + "/Images");
+			}
+		}
+
 		public int NbPceX {
 			get {
 				return nbPceX;
@@ -181,7 +191,19 @@ namespace Opuz2015
 				return;
 			nbPceY = Convert.ToInt32(e.NewValue);
 		}
-
+		void onImageClick (object sender, MouseButtonEventArgs e){
+			mainMenu.Visible = false;
+			if (imgSelection == null) {
+				imgSelection = this.LoadInterface ("#Opuz2015.ui.ImageSelect.goml");
+				imgSelection.DataSource = this;
+			}else
+				imgSelection.Visible = true;
+		}
+		void onSelectedImageChanged(object sender, SelectionChangeEventArgs e){
+			mainMenu.Visible = true;
+			imgSelection.Visible = false;
+			ImagePath = e.NewValue.ToString();
+		}
 		void onCutPuzzle (object sender, MouseButtonEventArgs e)
 		{
 			mainMenu.Visible = false;
@@ -214,6 +236,7 @@ namespace Opuz2015
 		Puzzle puzzle;
 		GraphicObject mainMenu = null;
 		GraphicObject finishedMessage = null;
+		GraphicObject imgSelection = null;
 
 		void draw()
 		{

@@ -5,7 +5,8 @@
 		<Border Fit="true" Margin="5" CornerRadius="10" BorderWidth="1" BorderColor="DimGray"
 				MouseEnter="{Background=BlueCrayola}"
 				MouseLeave="{Background=Transparent}">
-			<Image Width="300" Height="200" Path="{ImagePath}" Margin="5"/>
+			<Image Width="300" Height="200" Path="{ImagePath}" Margin="5" Focusable="true"
+					MouseClick="onImageClick"/>
 		</Border>
 		<HorizontalStack Fit="true" Margin="5" Background="0,5;0,5;0,7;0,9" CornerRadius="10">
 			<Label Text="Dimensions:" Font="OrangeJuice, 26" Margin="5"/>
