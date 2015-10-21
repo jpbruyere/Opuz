@@ -250,9 +250,7 @@ namespace Opuz2015
 			GL.BindTexture(TextureTarget.Texture2D, Image);
 			GL.ActiveTexture (TextureUnit.Texture1);
 			GL.BindTexture(TextureTarget.Texture2D, tex);
-
-			foreach (Piece p in tmp)
-				p.RenderBorder ();			
+					
 			foreach (Piece p in tmp)
 				p.Render ();	
 

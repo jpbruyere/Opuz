@@ -36,11 +36,13 @@ namespace Opuz2015
 		{
 			puzzle = _puzzle;
 			IndProfile = _indicesBorder.ToArray ();
-			IndBorder = new int[_indicesBorder.Count*2];
+			IndBorder = new int[_indicesBorder.Count*2+2];
 			for (int i = 0; i < _indicesBorder.Count; i++) {
 				IndBorder [i * 2] = _indicesBorder [i]+ puzzle.BorderOffset;
 				IndBorder [i * 2 + 1] = _indicesBorder [i] ;
 			}
+			IndBorder [_indicesBorder.Count * 2] = _indicesBorder [0] + puzzle.BorderOffset;
+			IndBorder [_indicesBorder.Count * 2 + 1] = _indicesBorder [1] ;
 
 			IndFill = earTriangulation(_indicesBorder);
 			computeBounds ();
@@ -286,17 +288,15 @@ namespace Opuz2015
 		public void Render(){
 			MainWin.mainShader.ModelMatrix = Transformations;
 			MainWin.mainShader.ColorMultiplier = colorMultiplier;
-			MainWin.mainShader.Color = Color.White;
-			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
-				DrawElementsType.UnsignedInt, IndFill);
-		}
-		public void RenderBorder(){
-			MainWin.mainShader.ModelMatrix = Transformations;
-			MainWin.mainShader.ColorMultiplier = colorMultiplier;
+
+			//border
 			MainWin.mainShader.Color = Color.DimGray;
 			GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder.Length,
 				DrawElementsType.UnsignedInt, IndBorder);
-			
+			//face
+			MainWin.mainShader.Color = Color.White;
+			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
+				DrawElementsType.UnsignedInt, IndFill);
 		}
 		public void RenderProfile(){
 			GL.DrawElements (PrimitiveType.LineLoop, IndProfile.Length,
