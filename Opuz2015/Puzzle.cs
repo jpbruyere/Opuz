@@ -82,8 +82,9 @@ namespace Opuz2015
 		}
 
 
-		private int _nbPieceX = 5;
-		private int _nbPieceY = 3;
+		int _nbPieceX = 5;
+		int _nbPieceY = 3;
+		public Cutter cutter = null;
 
 		#region VAO
 		int vaoHandle,
@@ -148,13 +149,14 @@ namespace Opuz2015
 		#region CTOR
 		public Puzzle (int _nbx, int _nby, string _imgPath)
 		{
-			
 			Image = new Texture (_imgPath);
 
 			nbPieceX = _nbx;
 			nbPieceY = _nby;
 
 			List<Vector3> tmp = new List<Vector3>();
+
+			cutter = new Cutter (CutType.Simple);
 
 			Vector3[] HBorder = MakeHorizontalBorder (nbPieceX, largP);
 			Vector3[] VBorder = MakeHorizontalBorder (nbPieceY, hautP);
@@ -191,8 +193,6 @@ namespace Opuz2015
 
 			Array.Copy (tmp.ToArray (), 0, positions, 0, tmp.Count);
 			Array.Copy (bord, 0, positions, BorderOffset, tmp.Count);
-
-			//indices = Enumerable.Range (0, tmp.Count - 1).ToArray ();
 
 			CreateVBOs ();
 			CreateVAOs ();
@@ -260,14 +260,14 @@ namespace Opuz2015
 
 		#region Cutting
 		void createPieces()
-		{			
+		{						
 			Pieces = new Piece[nbPieceX,nbPieceY];
 
 			int ptr0 = 0;
 			int ptr2 = nbPieceX;
 
 
-			int ptrV0 = (nbPieceY - 1) * nbPieceX * Cut.NbPoints + 2 * nbPieceX;
+			int ptrV0 = (nbPieceY - 1) * nbPieceX * cutter.NbPoints + 2 * nbPieceX;
 
 
 			for (int y = 0; y < nbPieceY; y++) {
@@ -283,16 +283,16 @@ namespace Opuz2015
 						ind.Add (ptr0);
 						ptr0++;
 					} else {						
-						ind.AddRange (Enumerable.Range(ptr0, Cut.NbPoints).ToArray());
-						ptr0 += Cut.NbPoints;
+						ind.AddRange (Enumerable.Range(ptr0, cutter.NbPoints).ToArray());
+						ptr0 += cutter.NbPoints;
 					}
 					//indice du bord droit
 					if (x == nbPieceX - 1) {
 						ind.Add (ptr1 + y);
 						ptr1++;
 					} else {						
-						ind.AddRange (Enumerable.Range(ptr1 + y * Cut.NbPoints, Cut.NbPoints).ToArray());
-						ptr1 += Cut.NbPoints * nbPieceY ;
+						ind.AddRange (Enumerable.Range(ptr1 + y * cutter.NbPoints, cutter.NbPoints).ToArray());
+						ptr1 += cutter.NbPoints * nbPieceY ;
 					}
 					//
 					//indice du bord inférieur
@@ -307,11 +307,11 @@ namespace Opuz2015
 						if (x == nbPieceX - 1)
 							ind.Add (ptr1 + y);
 						else
-							ind.Add (ptr2 + Cut.NbPoints);
+							ind.Add (ptr2 + cutter.NbPoints);
 
-						ind.AddRange (Enumerable.Range(ptr2+1, Cut.NbPoints - 1).Reverse().ToArray());
+						ind.AddRange (Enumerable.Range(ptr2+1, cutter.NbPoints - 1).Reverse().ToArray());
 						ind.Add (ptr2);//1st point of left border
-						ptr2 += Cut.NbPoints;
+						ptr2 += cutter.NbPoints;
 					}
 
 					//indice du bord gauche
@@ -319,8 +319,8 @@ namespace Opuz2015
 						ptr3 += nbPieceY ;
 					else if (x > 0 ) {
 						//						ind.Add (ptr3 + Cut.NbPoints);
-						ind.AddRange (Enumerable.Range(ptr3+y*Cut.NbPoints+1, Cut.NbPoints-1).Reverse().ToArray());
-						ptr3 += Cut.NbPoints * nbPieceY ;
+						ind.AddRange (Enumerable.Range(ptr3+y*cutter.NbPoints+1, cutter.NbPoints-1).Reverse().ToArray());
+						ptr3 += cutter.NbPoints * nbPieceY ;
 					}
 
 					Pieces [x, y] = new Piece (this, ind);
@@ -334,13 +334,14 @@ namespace Opuz2015
 					lock(Mutex)
 						ZOrderedPieces.Add (p);
 					if (y < nbPieceY - 1)
-						p.Neighbours [0] = Pieces [x, y + 1];
+						p.Neighbours [2] = Pieces [x, y + 1];
 					if (x < nbPieceX - 1)
 						p.Neighbours [1] = Pieces [x + 1, y];
 					if (y > 0)
-						p.Neighbours [2] = Pieces [x, y - 1];
+						p.Neighbours [0] = Pieces [x, y - 1];
 					if (x > 0)
 						p.Neighbours [3] = Pieces [x - 1, y];
+					p.SetBorderIndices ();
 				}
 			}
 		}
@@ -355,7 +356,7 @@ namespace Opuz2015
 			List<Vector3> tmp = new List<Vector3>();
 
 			for (int i = 0; i < nbCut; i++) {
-				tmp.AddRange (new Cut (i * cutSize, cutSize).Positions);
+				tmp.AddRange (cutter.Cut(i * cutSize, cutSize));
 			}
 			//tmp.Add (new Vector3 (nbCut * cutSize, 0, 0));
 			return tmp.ToArray ();

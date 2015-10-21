@@ -47,8 +47,8 @@
     <Compile Include="main.cs" />
     <Compile Include="Piece.cs" />
     <Compile Include="Puzzle.cs" />
-    <Compile Include="Cut.cs" />
     <Compile Include="shaders\PuzzleShader.cs" />
+    <Compile Include="Cutter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="shaders\" />

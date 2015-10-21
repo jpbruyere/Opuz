@@ -36,14 +36,6 @@ namespace Opuz2015
 		{
 			puzzle = _puzzle;
 			IndProfile = _indicesBorder.ToArray ();
-			IndBorder = new int[_indicesBorder.Count*2+2];
-			for (int i = 0; i < _indicesBorder.Count; i++) {
-				IndBorder [i * 2] = _indicesBorder [i]+ puzzle.BorderOffset;
-				IndBorder [i * 2 + 1] = _indicesBorder [i] ;
-			}
-			IndBorder [_indicesBorder.Count * 2] = _indicesBorder [0] + puzzle.BorderOffset;
-			IndBorder [_indicesBorder.Count * 2 + 1] = _indicesBorder [1] ;
-
 			IndFill = earTriangulation(_indicesBorder);
 			computeBounds ();
 
@@ -65,7 +57,7 @@ namespace Opuz2015
 
 		#region Pubilc Properties
 		public Rectangle<float> Bounds;
-		public int[] IndBorder;
+		public int[][] IndBorder;
 		public int[] IndProfile;
 		public int[] IndFill;
 		public Matrix4 Transformations{
@@ -230,17 +222,21 @@ namespace Opuz2015
 						puzzle.SomePiecesAreNotLinked = true;
 					continue;
 				}
-				IsLinked [i] = true;
-				Animation.StartAnimation (new FloatAnimation (this, "ColorMultiplier", 2f,0.5f), 0, onColorMultAnimEnd);
-				Piece p = Neighbours [i];
-				p.ResetVisitedStatus ();
-				p.Move (Dx - p.Dx -cDelta.X, Dy - p.Dy- cDelta.Y);
-				p.IsLinked[opositePce(i)] = true;
-				p.Visited = false;
-				p.Test ();
+				Bind (i);
 			}
 		}
-			
+
+		public void Bind(int i)
+		{			
+			IsLinked [i] = true;
+			Animation.StartAnimation (new FloatAnimation (this, "ColorMultiplier", 2f,0.5f), 0, onColorMultAnimEnd);
+			Piece p = Neighbours [i];
+			p.ResetVisitedStatus ();
+			p.Move (Dx - p.Dx -cDelta.X, Dy - p.Dy- cDelta.Y);
+			p.IsLinked[opositePce(i)] = true;
+			p.Visited = false;
+			p.Test ();
+		}		
 		public void ResetVisitedStatus()
 		{			
 			if (!Visited)
@@ -263,12 +259,6 @@ namespace Opuz2015
 				return false;
 			if (Angle != p.Angle)
 				return false;
-
-//			Point<float> c = Bounds.Center;
-//			Vector3 rotatedDxDy = Vector3.Transform(new Vector3(p.Dx,p.Dy,0),
-//				Matrix4.CreateTranslation (c.X, c.Y, 0) *
-//				Matrix4.CreateRotationZ (angle) *
-//				Matrix4.CreateTranslation (-c.X, -c.Y, 0));
 			cDelta = Bounds.Center - p.Bounds.Center;
 			cDelta = Vector3.Transform (cDelta, Matrix4.CreateRotationZ (Angle));
 			if (
@@ -289,10 +279,14 @@ namespace Opuz2015
 			MainWin.mainShader.ModelMatrix = Transformations;
 			MainWin.mainShader.ColorMultiplier = colorMultiplier;
 
-			//border
-			MainWin.mainShader.Color = Color.DimGray;
-			GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder.Length,
-				DrawElementsType.UnsignedInt, IndBorder);
+			//border, only when not linked
+			for (int i = 0; i < 4; i++) {
+				if (IsLinked [i])
+					continue;
+				MainWin.mainShader.Color = Color.DimGray;
+				GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder[i].Length,
+					DrawElementsType.UnsignedInt, IndBorder[i]);				
+			}
 			//face
 			MainWin.mainShader.Color = Color.White;
 			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
@@ -347,6 +341,28 @@ namespace Opuz2015
 		#endregion
 
 		#region triangulation and bounds calculations
+		public void ComputeBorderIndices()
+		{
+			IndBorder = new int[4][];
+
+			int ptr = 0;
+			for (int c = 0; c < 4; c++) {
+				int nbp = puzzle.cutter.NbPoints;
+				if (Neighbours [c] == null)
+					nbp = 1;
+				IndBorder [c] = new int[nbp*2+2];
+				for (int i = 0; i < nbp; i++) {
+					IndBorder [c] [i * 2] = IndProfile [ptr+i] + puzzle.BorderOffset;
+					IndBorder [c] [i * 2 + 1] = IndProfile [ptr+i];
+				}
+				if (c < 3)
+					ptr += nbp;
+				else
+					ptr = 0;
+				IndBorder [c][nbp*2] = IndProfile [ptr] + puzzle.BorderOffset;
+				IndBorder [c][nbp*2 + 1] = IndProfile [ptr] ;
+			}			
+		}
 		void computeBounds()
 		{
 			float minX = float.MaxValue,

@@ -28,23 +28,33 @@ using System.Diagnostics;
 
 namespace Opuz2015
 {
-	public class Cut
+	public enum CutType{
+		Simple,
+		Diamond,
+	}
+	public class Cutter
 	{
 		static Random rnd = new Random();
+
 		public bool TutIsInside = false;
 
-		public Vector3[] Positions;
 
-		const int resolution = 20;
-		const float tutWidth = 0.10f;
-		const float tutWidthVariance = 0.3f;
-		const float tutHeight = 0.3f;
-		const float tutHeightVariance = 0.5f;
-		const float tutPosVariance = 0.3f;
+		int resolution = 20;
+		float tutWidth = 0.10f;
+		float tutWidthVariance = 0.3f;
+		float tutHeight = 0.3f;
+		float tutHeightVariance = 0.5f;
+		float tutPosVariance = 0.3f;
 
-		public static int NbPoints { get {return resolution + 1; }}
+		public int NbPoints { get {return resolution + 1; }}
+		CutType CutType = CutType.Simple;
 
-		public Cut (float startPos, float length)
+		public Cutter(CutType _type = CutType.Simple){
+			CutType = _type;
+
+		}
+
+		public Vector3[] Cut (float startPos, float length)
 		{
 			float tw = length * tutWidth;
 			float th = length * tutHeight;
@@ -60,7 +70,6 @@ namespace Opuz2015
 				TutIsInside = true;
 			}
 				
-
 			Vector3[] p = new Vector3[] {
 				new Vector3 (startPos, 0, 0),
 				new Vector3 (startPos + tp - tw, 		0, 0),
@@ -76,12 +85,12 @@ namespace Opuz2015
 				float t = i / (float)(resolution-1);
 				points.Add(CalculateBezierPoint(t,p[1],p[2],p[3],p[4]));
 			}
-			//points.Add (p [5]);	
+				
 
-			Positions = points.ToArray ();
+			return points.ToArray ();
 		}
 
-		public static Vector3 CalculateBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
+		static Vector3 CalculateBezierPoint(float t, Vector3 p0, Vector3 p1, Vector3 p2, Vector3 p3)
 		{
 			float u = 1 - t;
 			float tt = t * t;
