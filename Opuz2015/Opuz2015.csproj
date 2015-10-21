@@ -66,16 +66,6 @@
     <EmbeddedResource Include="shaders\red.frag" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\Magic3D\GGL\GGL.csproj">
-      <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
-      <Name>GGL</Name>
-    </ProjectReference>
-    <ProjectReference Include="..\..\Magic3D\MiscUtil\MiscUtil.csproj">
-      <Project>{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}</Project>
-      <Name>MiscUtil</Name>
-    </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
     <None Include="Images\0.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

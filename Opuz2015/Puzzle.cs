@@ -412,11 +412,11 @@ namespace Opuz2015
 		{						
 			GL.Disable (EnableCap.CullFace);
 
-			MainWin.testShader.Enable ();
-			MainWin.testShader.ProjectionMatrix = Matrix4.CreateOrthographicOffCenter 
+			MainWin.RedFillShader.Enable ();
+			MainWin.RedFillShader.ProjectionMatrix = Matrix4.CreateOrthographicOffCenter 
 				(0, Image.Width, 0, Image.Height, 0, 1);
-			MainWin.testShader.ModelViewMatrix = Matrix4.Identity;
-			MainWin.testShader.ModelMatrix = Matrix4.Identity;
+			MainWin.RedFillShader.ModelViewMatrix = Matrix4.Identity;
+			MainWin.RedFillShader.ModelMatrix = Matrix4.Identity;
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
 			float[] cc = new float[4];

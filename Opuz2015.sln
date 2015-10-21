@@ -3,9 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opuz2015", "Opuz2015\Opuz2015.csproj", "{7360A69B-5E5B-484D-857B-57D0F2C9BC32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "..\Magic3D\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MiscUtil", "..\Magic3D\MiscUtil\MiscUtil.csproj", "{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "..\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,18 +15,6 @@ Global
 		Release|Linux_x86 = Release|Linux_x86
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|Linux_x86.Build.0 = Debug|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|Win_x86.ActiveCfg = Debug|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|Win_x86.Build.0 = Debug|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Debug|x86.Build.0 = Debug|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|Linux_x86.ActiveCfg = Release|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|Linux_x86.Build.0 = Release|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|Win_x86.ActiveCfg = Release|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|Win_x86.Build.0 = Release|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|x86.ActiveCfg = Release|Any CPU
-		{4FC1D5F4-661F-48DC-B397-4CDCB7D61ABE}.Release|x86.Build.0 = Release|Any CPU
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Linux_x86.Build.0 = Debug|Any CPU
 		{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}.Debug|Win_x86.ActiveCfg = Debug|Any CPU

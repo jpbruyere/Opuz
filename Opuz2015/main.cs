@@ -94,8 +94,8 @@ namespace Opuz2015
 		#endregion
 
 		public static PuzzleShader mainShader;
-		public static GameLib.EffectShader redShader;
-		public static GameLib.EffectShader testShader;
+		public static GameLib.EffectShader selMeshShader;
+		public static GameLib.EffectShader RedFillShader;
 
 
 		int nbPceX = 5;
@@ -138,9 +138,9 @@ namespace Opuz2015
 
 		}
 		public static void ActivateRedShader(){
-			redShader.Enable ();
-			redShader.ProjectionMatrix = projection;
-			redShader.ModelViewMatrix = modelview;
+			selMeshShader.Enable ();
+			selMeshShader.ProjectionMatrix = projection;
+			selMeshShader.ModelViewMatrix = modelview;
 		}
 
 		void initOpenGL()
@@ -148,7 +148,6 @@ namespace Opuz2015
 			vLook = vEyeTarget - vEye;
 
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
-			//GL.Enable(EnableCap.DepthTest);
 			GL.DepthFunc(DepthFunction.Less);
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace (CullFaceMode.Front);
@@ -160,8 +159,8 @@ namespace Opuz2015
 
 			mainShader = new PuzzleShader();
 			
-			redShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
-			testShader = new GameLib.EffectShader ("Opuz2015.shaders.red");
+			selMeshShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
+			RedFillShader = new GameLib.EffectShader ("Opuz2015.shaders.red");
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 
@@ -230,10 +229,10 @@ namespace Opuz2015
 			if (selMesh == null)
 				return;
 
-			redShader.Enable ();
-			redShader.ProjectionMatrix = projection;
-			redShader.ModelViewMatrix = modelview;
-			redShader.ModelMatrix = puzzle.SelectedPiece.Transformations;
+			selMeshShader.Enable ();
+			selMeshShader.ProjectionMatrix = projection;
+			selMeshShader.ModelViewMatrix = modelview;
+			selMeshShader.ModelMatrix = puzzle.SelectedPiece.Transformations;
 
 			GL.PointSize (2f);
 			//GL.Disable (EnableCap.DepthTest);
@@ -457,12 +456,8 @@ namespace Opuz2015
 				}
 				if (e.Mouse.RightButton == ButtonState.Pressed) {
 					Matrix4 m = Matrix4.CreateTranslation (-e.XDelta, e.YDelta, 0);
-
 					vEye = Vector3.Transform (vEye, m);
 					vEyeTarget = Vector3.Transform (vEyeTarget, m);
-					//vLook = Vector3.Transform (vLook, m);
-
-					//vLook = Vector3.Transform(vLook, m2);
 					UpdateViewMatrix ();
 					return;
 				}
@@ -481,7 +476,7 @@ namespace Opuz2015
 				speed *= 20.0f;
 
 			Vector3 tmp = vEye + vLook * e.Delta * speed;
-			if (tmp.Z < 0)
+			if (tmp.Z < 0 || tmp.Z > zFar * 0.8)
 				return;
 			vEye = tmp;
 			//vLook.Z += e.Delta * 0.1f;
