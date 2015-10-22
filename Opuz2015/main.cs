@@ -71,70 +71,29 @@ namespace Opuz2015
 		public static Matrix4 projection;
 		public static int[] viewport = new int[4];
 
-		//public static Vector3 vEye = new Vector3(150.0f, 50.0f, 1.5f);    // Camera Position
-		public static Vector3 vEye = new Vector3(0.0f, -200.0f, 1400.0f);    // Camera Position
-		public static Vector3 vEyeTarget = new Vector3(0, 100, 0f);
-		public static Vector3 vLook = new Vector3(0.5f, 0.5f, -0.5f);  // Camera vLook Vector
-		public static Vector4 vLight = new Vector4 (-5.0f, -5.0f, 25.0f, 0.0f);
-		public static Vector3 vMouse = Vector3.Zero;
-
-		float _zFar = 6000.0f;
-
-		public float zFar {
-			get { return _zFar; }
-			set {
-				_zFar = value;
-			}
+		public float EyeDist { 
+			get { return eyeDist; } 
+			set { 
+				eyeDist = value; 
+				UpdateViewMatrix ();
+			} 
 		}
-
+		public Vector3 vEyeTarget = new Vector3(0, 100, 0f);
+		public Vector3 vLook = Vector3.Normalize(new Vector3(0.0f, -0.1f, 0.9f));  // Camera vLook Vector
+		public float zFar = 6000.0f;
 		public float zNear = 1.0f;
 		public float fovY = (float)Math.PI / 4;
 
+		float eyeDist = 1000f;
+		float eyeDistTarget = 1000f;
 		float MoveSpeed = 100.0f;
 		float RotationSpeed = 0.02f;
 		#endregion
 
+		#region GL
 		public static PuzzleShader mainShader;
 		public static GameLib.EffectShader selMeshShader;
 		public static GameLib.EffectShader RedFillShader;
-
-
-		int nbPceX = 5;
-		int nbPceY = 3;
-		string imagePath = @"Images/0.jpg";
-
-		public string[] Images
-		{
-			get {
-				return Directory.GetFiles(
-					System.IO.Path.GetDirectoryName(
-						System.Reflection.Assembly.GetExecutingAssembly().Location ) + "/Images");
-			}
-		}
-
-		public int NbPceX {
-			get {
-				return nbPceX;
-			}
-			set {
-				nbPceX = value;
-				NotifyValueChanged ("NbPceX", nbPceX);
-			}
-		}
-		public int NbPceY {
-			get { return nbPceY; }
-			set { 
-				nbPceY = value;
-				NotifyValueChanged ("NbPceY", nbPceY);
-			}
-		}
-		public string ImagePath {
-			get { return imagePath; }
-			set {
-				imagePath = value;
-				NotifyValueChanged ("ImagePath", imagePath);
-			}
-		}
 
 		public void ActivateMainShader()
 		{
@@ -152,11 +111,10 @@ namespace Opuz2015
 			selMeshShader.ProjectionMatrix = projection;
 			selMeshShader.ModelViewMatrix = modelview;
 		}
+		vaoMesh selMesh;
 
 		void initOpenGL()
-		{
-			vLook = vEyeTarget - vEye;
-
+		{			
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 			GL.DepthFunc(DepthFunction.Less);
 			GL.Enable(EnableCap.CullFace);
@@ -168,7 +126,7 @@ namespace Opuz2015
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
 			mainShader = new PuzzleShader();
-			
+
 			selMeshShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
 			RedFillShader = new GameLib.EffectShader ("Opuz2015.shaders.red");
 
@@ -177,6 +135,28 @@ namespace Opuz2015
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");	
 
+		}
+		#endregion
+
+		#region Interface
+		GraphicObject mainMenu = null;
+		GraphicObject finishedMessage = null;
+		GraphicObject imgSelection = null;
+
+		void initInterface(){
+			//special event handlers fired only if mouse not in interface objects
+			//for scene mouse handling
+			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
+			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
+			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonDown);
+			this.MouseButtonUp += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonUp);
+
+			LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
+			mainMenu = LoadInterface("#Opuz2015.ui.MainMenu.goml");
+			mainMenu.DataSource = this;
+			finishedMessage = LoadInterface ("#Opuz2015.ui.Finished.goml");
+			finishedMessage.DataSource = this;
+			finishedMessage.Visible = false;			
 		}
 
 		void onNbPceXChanged (object sender, ValueChangeEventArgs e)
@@ -220,24 +200,49 @@ namespace Opuz2015
 		{
 			closeCurrentPuzzle ();
 		}
-		void closeGame(){
-			if (puzzle != null)
-				puzzle.Dispose();
-			this.Quit ();
-		}
-		void closeCurrentPuzzle(){
-			finishedMessage.Visible = false;
-			mainMenu.Visible = true;
-			if (puzzle != null)
-				puzzle.Dispose();
-			puzzle = null;
-		}
+		#endregion
 
 		Puzzle puzzle;
-		GraphicObject mainMenu = null;
-		GraphicObject finishedMessage = null;
-		GraphicObject imgSelection = null;
 
+		int nbPceX = 5;
+		int nbPceY = 3;
+		string imagePath = @"Images/0.jpg";
+		const float zSelPce = 8.0f;
+
+		bool puzzleIsReady { get { return puzzle == null ? false : puzzle.Ready; } }
+
+		public string[] Images
+		{
+			get {
+				return Directory.GetFiles(
+					System.IO.Path.GetDirectoryName(
+						System.Reflection.Assembly.GetExecutingAssembly().Location ) + "/Images");
+			}
+		}
+		public int NbPceX {
+			get {
+				return nbPceX;
+			}
+			set {
+				nbPceX = value;
+				NotifyValueChanged ("NbPceX", nbPceX);
+			}
+		}
+		public int NbPceY {
+			get { return nbPceY; }
+			set { 
+				nbPceY = value;
+				NotifyValueChanged ("NbPceY", nbPceY);
+			}
+		}
+		public string ImagePath {
+			get { return imagePath; }
+			set {
+				imagePath = value;
+				NotifyValueChanged ("ImagePath", imagePath);
+			}
+		}			
+			
 		void draw()
 		{
 			if (puzzle == null)
@@ -263,29 +268,29 @@ namespace Opuz2015
 			//GL.Enable (EnableCap.DepthTest);
 			GL.UseProgram (0);
 		}
-			
+
+		void closeGame(){
+			if (puzzle != null)
+				puzzle.Dispose();
+			this.Quit ();
+		}
+		void closeCurrentPuzzle(){
+			finishedMessage.Visible = false;
+			mainMenu.Visible = true;
+			if (puzzle != null)
+				puzzle.Dispose();
+			puzzle = null;
+		}
+
+		#region OTK window overrides
 		protected override void OnLoad (EventArgs e)
 		{
 			base.OnLoad (e);
 
-			//special event handlers fired only if mouse not in interface objects
-			//for scene mouse handling
-			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
-			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
-			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonDown);
-			this.MouseButtonUp += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonUp);
-
-			LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
-			mainMenu = LoadInterface("#Opuz2015.ui.MainMenu.goml");
-			mainMenu.DataSource = this;
-			finishedMessage = LoadInterface ("#Opuz2015.ui.Finished.goml");
-			finishedMessage.DataSource = this;
-			finishedMessage.Visible = false;
-
+			initInterface ();
 
 			initOpenGL ();
-		}
-			
+		}			
 		public override void GLClear ()
 		{
 			GL.ClearColor(0.1f, 0.1f, 0.3f, 1.0f);
@@ -302,11 +307,9 @@ namespace Opuz2015
 			base.OnResize (e);
 			UpdateViewMatrix();
 		}
-		private int frameCpt = 0;
+		int frameCpt = 0;
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
-
-
 			base.OnUpdateFrame (e);
 
 			fps = (int)RenderFrequency;
@@ -319,6 +322,29 @@ namespace Opuz2015
 
 			GGL.Animation.ProcessAnimations ();
 		}
+		#endregion
+
+		#region vLookCalculations
+		public void UpdateViewMatrix()
+		{
+			Rectangle r = this.ClientRectangle;
+			GL.Viewport( r.X, r.Y, r.Width, r.Height);
+			projection = Matrix4.CreatePerspectiveFieldOfView (fovY, r.Width / (float)r.Height, zNear, zFar);
+			Vector3 vEye = vEyeTarget + vLook * eyeDist;
+			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
+			GL.GetInteger(GetPName.Viewport, viewport);
+
+			try {
+				mainShader.ProjectionMatrix = projection;
+				mainShader.ModelViewMatrix = modelview;
+				mainShader.ModelMatrix = Matrix4.Identity;
+			} catch (Exception ex) {
+				Debug.WriteLine ("UpdateViewMatrices: failed to set shader matrices: " + ex.Message);
+			}
+		}
+		#endregion
+
+		#region Keyboard
 		protected override void OnKeyDown (KeyboardKeyEventArgs e)
 		{
 			base.OnKeyDown (e);
@@ -335,56 +361,6 @@ namespace Opuz2015
 				break;
 			}
 		}
-		vaoMesh selMesh;
-		const float zSelPce = 8.0f;
-
-		bool puzzleIsReady { get { return puzzle == null ? false : puzzle.Ready; } }
-
-		#region vLookCalculations
-		public void UpdateViewMatrix()
-		{
-			Rectangle r = this.ClientRectangle;
-			GL.Viewport( r.X, r.Y, r.Width, r.Height);
-			projection = Matrix4.CreatePerspectiveFieldOfView (fovY, r.Width / (float)r.Height, zNear, zFar);
-				//*Matrix4.CreateRotationZ(MathHelper.Pi);
-			vLook = Vector3.NormalizeFast (vEyeTarget - vEye);
-			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
-			GL.GetInteger(GetPName.Viewport, viewport);
-
-			try {
-				mainShader.ProjectionMatrix = projection;
-				mainShader.ModelViewMatrix = modelview;
-				mainShader.ModelMatrix = Matrix4.Identity;
-			} catch (Exception ex) {
-				Debug.WriteLine ("UpdateViewMatrices: failed to set shader matrices: " + ex.Message);
-			}
-		}
-		Vector3 vLookDirOnXYPlane
-		{
-			get
-			{
-				return Vector3.NormalizeFast(new Vector3 (vLook.X, vLook.Y, 0));
-			}
-		}
-		public Vector3 vLookPerpendicularOnXYPlane
-		{
-			get
-			{
-				Vector3 vHorizDir;
-				if (vLook.X < 0)
-					vHorizDir = Vector3.Cross(Vector3.UnitZ, Vector3.NormalizeFast(new Vector3 (vLook.X, vLook.Y, 0)));
-				else
-					vHorizDir = Vector3.Cross(Vector3.NormalizeFast(new Vector3 (vLook.X, vLook.Y, 0)), Vector3.UnitZ);
-				Debug.WriteLine (vLook.ToString() + " - " + vHorizDir.ToString ());
-				return vHorizDir;
-			}
-		}
-
-		void moveCamera(Vector3 v)
-		{
-			vEye += v;
-			vEyeTarget += v;
-		}
 		#endregion
 
 		#region Mouse
@@ -393,17 +369,14 @@ namespace Opuz2015
 			if (!puzzleIsReady)
 				return;
 
-			CursorVisible = true;
-
 			if (e.Button == MouseButton.Left) {
 				Point<float> mPos = new Point<float> (e.X, e.Y);
 				mPos.Y = viewport [3] - mPos.Y;
 				Piece[] tmp = null;
-				lock (puzzle.Mutex) {
-					//Piece[] tmp = new Piece[ZOrderedPieces.Count];
+
+				lock (puzzle.Mutex)
 					tmp = puzzle.ZOrderedPieces.ToArray();
-					//Array.Copy (ZOrderedPieces, tmp, tmp.Length);
-				}
+				
 				for (int i = tmp.Length-1; i >= 0; i--) {					
 					Piece p = tmp [i];
 					if (p.MouseIsIn (mPos)) {
@@ -458,30 +431,27 @@ namespace Opuz2015
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
-					Vector3 tmp = Vector3.Transform (vEye, 
-						Matrix4.CreateTranslation (-vEyeTarget) *
-						Matrix4.CreateRotationX (-e.YDelta * RotationSpeed) *
-						Matrix4.CreateTranslation (vEyeTarget));
-					if (tmp.Y >= vEyeTarget.Y || tmp.Z < 0f)
+					Vector3 tmp = Vector3.Transform (vLook, 
+						Matrix4.CreateRotationX (-e.YDelta * RotationSpeed));
+					tmp.Normalize();
+					if (tmp.Y >= 0f || tmp.Z <= 0f)
 						return;
-					vEye = tmp;
+					vLook = tmp;
 					UpdateViewMatrix ();
 					return;
 				}
 				if (e.Mouse.LeftButton == ButtonState.Pressed) {
-					if (puzzle.SelectedPiece != null) {
-						
+					if (puzzle.SelectedPiece != null) {						
 						Piece p = puzzle.SelectedPiece;
 						p.ResetVisitedStatus ();
-						p.Move ((float)e.XDelta * vEye.Z*0.003f, -(float)e.YDelta* vEye.Z*0.003f);
+						p.Move ((float)e.XDelta * eyeDist*0.001f, -(float)e.YDelta* eyeDist*0.001f);
 						return;
 					}
 				}
 				if (e.Mouse.RightButton == ButtonState.Pressed) {
 					Matrix4 m = Matrix4.CreateTranslation (-e.XDelta, e.YDelta, 0);
-					vEye = Vector3.Transform (vEye, m);
 					vEyeTarget = Vector3.Transform (vEyeTarget, m);
-					UpdateViewMatrix ();
+					UpdateViewMatrix();
 					return;
 				}
 
@@ -498,12 +468,12 @@ namespace Opuz2015
 			else if (Keyboard[Key.ControlLeft])
 				speed *= 20.0f;
 
-			Vector3 tmp = vEye + vLook * e.Delta * speed;
-			if (tmp.Z < 0 || tmp.Z > zFar * 0.8)
-				return;
-			vEye = tmp;
-			//vLook.Z += e.Delta * 0.1f;
-			UpdateViewMatrix();
+			eyeDistTarget -= e.Delta * speed;
+			if (eyeDistTarget < zNear+10)
+				eyeDistTarget = zNear+10;
+			else if (eyeDistTarget > zFar-100)
+				eyeDistTarget = zFar-100;
+			Animation.StartAnimation(new Animation<float> (this, "EyeDist", eyeDistTarget, (eyeDistTarget - eyeDist) * 0.2f));
 		}
 		#endregion
 
@@ -522,8 +492,5 @@ namespace Opuz2015
 			}
 		}
 		#endregion
-
-
-
 	}
 }
