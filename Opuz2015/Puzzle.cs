@@ -206,8 +206,7 @@ namespace Opuz2015
 
 			createPieces ();
 
-			initFbo ();
-			updateFbo ();
+			createProfileTexture ();
 
 			Ready = true;
 		}
@@ -256,7 +255,7 @@ namespace Opuz2015
 			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, Image);
 			GL.ActiveTexture (TextureUnit.Texture1);
-			GL.BindTexture(TextureTarget.Texture2D, tex);
+			GL.BindTexture(TextureTarget.Texture2D, profileTexture);
 					
 			foreach (Piece p in tmp)
 				p.Render ();	
@@ -381,17 +380,18 @@ namespace Opuz2015
 		}
 		#endregion
 
-		#region FBO
-		int tex, fbo;
-		void initFbo()
-		{			
-			tex = new Texture (Image.Width, Image.Height);
+		#region PROFILE FBO
+		int profileTexture;
+		void createProfileTexture()
+		{
+			int fbo;
+			profileTexture = new Texture (Image.Width, Image.Height);
 			int stride = 4 * Image.Width;
 			int bmpSize = Math.Abs (stride) * Image.Height;
 			byte[] bmp = new byte[bmpSize];
 
 			GL.ActiveTexture (TextureUnit.Texture0);
-			GL.BindTexture(TextureTarget.Texture2D, tex);
+			GL.BindTexture(TextureTarget.Texture2D, profileTexture);
 
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, 
 				Image.Width, Image.Height, 0,
@@ -406,17 +406,13 @@ namespace Opuz2015
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
 			GL.FramebufferTexture2D(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0,
-				TextureTarget.Texture2D, tex, 0);
+				TextureTarget.Texture2D, profileTexture, 0);
 
 			if (GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer) != FramebufferErrorCode.FramebufferComplete)
 			{
 				throw new Exception(GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer).ToString());
 			}
 
-			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-		}
-		void updateFbo()
-		{						
 			GL.Disable (EnableCap.CullFace);
 
 			MainWin.RedFillShader.Enable ();
@@ -445,6 +441,7 @@ namespace Opuz2015
 			GL.UseProgram (0);
 			GL.ClearColor (cc[0],cc[1],cc[2],cc[3]);
 			GL.Viewport (viewport [0], viewport [1], viewport [2], viewport [3]);			
+			GL.DeleteFramebuffer(fbo);
 		}
 		#endregion
 
