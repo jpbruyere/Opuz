@@ -30,6 +30,7 @@ namespace Opuz2015
 {
 	public enum CutType{
 		Simple,
+		Curvy,
 		Diamond,
 	}
 	public class Cutter
@@ -46,7 +47,19 @@ namespace Opuz2015
 		float tutHeightVariance = 0.5f;
 		float tutPosVariance = 0.3f;
 
-		public int NbPoints { get {return resolution + 1; }}
+		public int NbPoints { 
+			get {
+				switch (CutType) {
+				case CutType.Simple:
+					return resolution + 1; 
+				case CutType.Curvy:
+					return (resolution-1) * 3; 
+				case CutType.Diamond:
+					return resolution + 1; 
+				}
+				return -1;
+			}
+		}
 		CutType CutType = CutType.Simple;
 
 		public Cutter(CutType _type = CutType.Simple){
@@ -69,21 +82,63 @@ namespace Opuz2015
 				th = -th;
 				TutIsInside = true;
 			}
-				
-			Vector3[] p = new Vector3[] {
-				new Vector3 (startPos, 0, 0),
-				new Vector3 (startPos + tp - tw, 		0, 0),
-				new Vector3 (startPos + tp - tw * 3.0f, 	th, 0),
-				new Vector3 (startPos + tp + tw * 3.0f,	th, 0),
-				new Vector3 (startPos + tp + tw, 		0, 0),
-				new Vector3 (startPos + length, 0, 0)
-			};
-
 			List<Vector3> points = new List<Vector3> ();
-			points.Add (p [0]);
-			for (int i = 0; i < resolution; i++) {
-				float t = i / (float)(resolution-1);
-				points.Add(CalculateBezierPoint(t,p[1],p[2],p[3],p[4]));
+			Vector3[] p = null;
+
+			switch (CutType) {
+			case CutType.Simple:
+				p = new Vector3[] {
+					new Vector3 (startPos, 0, 0),
+					new Vector3 (startPos + tp - tw, 		0, 0),
+					new Vector3 (startPos + tp - tw * 3.0f, 	th, 0),
+					new Vector3 (startPos + tp + tw * 3.0f,	th, 0),
+					new Vector3 (startPos + tp + tw, 		0, 0),
+					new Vector3 (startPos + length, 0, 0)
+				};
+
+
+				points.Add (p [0]);
+				for (int i = 0; i < resolution; i++) {
+					float t = i / (float)(resolution-1);
+					points.Add(CalculateBezierPoint(t,p[1],p[2],p[3],p[4]));
+				}
+				break;
+			case CutType.Curvy:
+				p = new Vector3[] {
+					new Vector3 (startPos, 0, 0),
+					new Vector3 (startPos + tp * 0.3f, 0, 0),
+					new Vector3 (startPos + tp - tw * 0.3f, -th * 0.3f, 0),
+
+					new Vector3 (startPos + tp - tw, 		0, 0),
+
+					new Vector3 (startPos + tp - tw * 3.0f, 	th, 0),
+					new Vector3 (startPos + tp + tw * 3.0f,		th, 0),
+
+					new Vector3 (startPos + tp + tw, 		0, 0),
+
+					new Vector3 (startPos + tp + tw * 0.3f, -th * 0.3f, 0),
+					new Vector3 (startPos + length - (length - tp) * 0.3f, 0, 0),
+					new Vector3 (startPos + length, 0, 0)
+				};
+					
+				for (int i = 0; i < resolution-1; i++) {
+					float t = i / (float)(resolution-1);
+					points.Add(CalculateBezierPoint(t,p[0],p[1],p[2],p[3]));
+
+				}
+				for (int i = 0; i < resolution-1; i++) {
+					float t = i / (float)(resolution-1);
+					points.Add(CalculateBezierPoint(t,p[3],p[4],p[5],p[6]));
+
+				}
+				for (int i = 0; i < resolution-1; i++) {
+					float t = i / (float)(resolution-1);
+					points.Add(CalculateBezierPoint(t,p[6],p[7],p[8],p[9]));
+				}
+
+				break;			
+			case CutType.Diamond:
+				break;
 			}
 				
 

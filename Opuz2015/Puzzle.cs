@@ -163,7 +163,7 @@ namespace Opuz2015
 
 			List<Vector3> tmp = new List<Vector3>();
 
-			cutter = new Cutter (CutType.Simple);
+			cutter = new Cutter (CutType.Curvy);
 
 			Vector3[] HBorder = MakeHorizontalBorder (nbPieceX, largP);
 			Vector3[] VBorder = MakeHorizontalBorder (nbPieceY, hautP);
