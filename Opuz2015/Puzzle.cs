@@ -38,6 +38,11 @@ namespace Opuz2015
 		}
 		#endregion
 
+		int _nbPieceX = 5;
+		int _nbPieceY = 3;
+		int _nbSides = 4;
+
+
 		public volatile bool Ready = false;
 		public Piece[,] Pieces {get;set;}
 		public List<Piece> ZOrderedPieces;
@@ -45,7 +50,12 @@ namespace Opuz2015
 		public object Mutex = new object();
 
 		public Texture Image;
+		public Cutter cutter = null;
 
+		public int nbSides {
+			get { return _nbSides; }
+			set { _nbSides = value; }
+		}
 		public int nbPieceX {
 			get { return _nbPieceX; }
 			set {
@@ -81,9 +91,6 @@ namespace Opuz2015
 		}
 
 
-		int _nbPieceX = 5;
-		int _nbPieceY = 3;
-		public Cutter cutter = null;
 
 		#region VAO
 		int vaoHandle,
@@ -146,12 +153,13 @@ namespace Opuz2015
 		#endregion
 
 		#region CTOR
-		public Puzzle (int _nbx, int _nby, string _imgPath)
+		public Puzzle (int _nbx, int _nby, string _imgPath, int _Sides = 4)
 		{
 			Image = new Texture (_imgPath);
 
 			nbPieceX = _nbx;
 			nbPieceY = _nby;
+			nbSides = _Sides;
 
 			List<Vector3> tmp = new List<Vector3>();
 

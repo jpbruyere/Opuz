@@ -39,8 +39,8 @@ namespace Opuz2015
 			IndFill = earTriangulation(_indicesBorder);
 			computeBounds ();
 
-			IsLinked = Enumerable.Repeat(false,4).ToArray();
-			Neighbours = new Piece[4];
+			IsLinked = Enumerable.Repeat(false, puzzle.nbSides).ToArray();
+			Neighbours = new Piece[puzzle.nbSides];
 		}
 		#endregion
 
@@ -267,7 +267,7 @@ namespace Opuz2015
 
 		int opositePce(int i)
 		{
-			return (i + 2) % 4;			
+			return (i + puzzle.nbSides / 2) % puzzle.nbSides;	
 		}
 		bool testProximity(int n)
 		{
@@ -297,7 +297,7 @@ namespace Opuz2015
 			MainWin.mainShader.ColorMultiplier = colorMultiplier;
 
 			//border, only when not linked
-			for (int i = 0; i < 4; i++) {
+			for (int i = 0; i < puzzle.nbSides; i++) {
 				if (IsLinked [i])
 					continue;
 				MainWin.mainShader.Color = Color.DimGray;
@@ -360,10 +360,10 @@ namespace Opuz2015
 		#region triangulation and bounds calculations
 		public void ComputeBorderIndices()
 		{
-			IndBorder = new int[4][];
+			IndBorder = new int[puzzle.nbSides][];
 
 			int ptr = 0;
-			for (int c = 0; c < 4; c++) {
+			for (int c = 0; c < puzzle.nbSides; c++) {
 				int nbp = puzzle.cutter.NbPoints;
 				if (Neighbours [c] == null)
 					nbp = 1;
@@ -372,7 +372,7 @@ namespace Opuz2015
 					IndBorder [c] [i * 2] = IndProfile [ptr+i] + puzzle.BorderOffset;
 					IndBorder [c] [i * 2 + 1] = IndProfile [ptr+i];
 				}
-				if (c < 3)
+				if (c < puzzle.nbSides - 1)
 					ptr += nbp;
 				else
 					ptr = 0;
