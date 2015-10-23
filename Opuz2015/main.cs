@@ -78,7 +78,7 @@ namespace Opuz2015
 				UpdateViewMatrix ();
 			} 
 		}
-		public Vector3 vEyeTarget = new Vector3(0, 100, 0f);
+		public Vector3 vEyeTarget = new Vector3(0, 0, 0f);
 		public Vector3 vLook = Vector3.Normalize(new Vector3(0.0f, -0.1f, 0.9f));  // Camera vLook Vector
 		public float zFar = 6000.0f;
 		public float zNear = 1.0f;
@@ -191,6 +191,8 @@ namespace Opuz2015
 				puzzle.Dispose();
 			puzzle = new Puzzle (NbPceX, NbPceY, ImagePath);
 			puzzle.Shuffle();
+			eyeDistTarget = puzzle.Image.Width*1.5f;
+			EyeDist = eyeDistTarget;
 		}
 		void onButQuitClick (object sender, MouseButtonEventArgs e){
 			closeGame ();
