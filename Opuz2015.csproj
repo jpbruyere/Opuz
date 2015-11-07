@@ -35,12 +35,9 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Drawing" />
-    <Reference Include="OpenTK">
-      <HintPath>..\..\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
-    </Reference>
     <Reference Include="Mono.Cairo" />
-    <Reference Include="golib">
-      <HintPath>..\..\GOLib\bin\Release\golib.dll</HintPath>
+    <Reference Include="OpenTK">
+      <HintPath>lib\opentk\Binaries\OpenTK\Release\OpenTK.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -81,9 +78,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\..\GGL\GGL.csproj">
+    <ProjectReference Include="lib\GGL\GGL.csproj">
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
+    </ProjectReference>
+    <ProjectReference Include="lib\GOLib\GOLib.csproj">
+      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
+      <Name>GOLib</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

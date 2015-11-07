@@ -1,0 +1,9 @@
+[submodule "lib/opentk"]
+	path = lib/opentk
+	url = https://github.com/jpbruyere/opentk.git
+[submodule "lib/GGL"]
+	path = lib/GGL
+	url = https://github.com/jpbruyere/GGL.git
+[submodule "lib/GOLib"]
+	path = lib/GOLib
+	url = https://github.com/jpbruyere/GOLib.git
