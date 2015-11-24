@@ -106,12 +106,6 @@ namespace Opuz2015
 			mainShader.ModelMatrix = Matrix4.Identity;
 
 		}
-		public static void ActivateRedShader(){
-			selMeshShader.Enable ();
-			selMeshShader.ProjectionMatrix = projection;
-			selMeshShader.ModelViewMatrix = modelview;
-		}
-		vaoMesh selMesh;
 
 		void initOpenGL()
 		{			
@@ -255,20 +249,6 @@ namespace Opuz2015
 			ActivateMainShader ();
 
 			puzzle.Render ();
-
-			if (selMesh == null)
-				return;
-
-			selMeshShader.Enable ();
-			selMeshShader.ProjectionMatrix = projection;
-			selMeshShader.ModelViewMatrix = modelview;
-			selMeshShader.ModelMatrix = puzzle.SelectedPiece.Transformations;
-
-			GL.PointSize (2f);
-			//GL.Disable (EnableCap.DepthTest);
-			selMesh.Render (PrimitiveType.TriangleStrip);
-			//GL.Enable (EnableCap.DepthTest);
-			GL.UseProgram (0);
 		}
 
 		void closeGame(){
@@ -295,7 +275,7 @@ namespace Opuz2015
 		}			
 		public override void GLClear ()
 		{
-			GL.ClearColor(0.1f, 0.1f, 0.3f, 1.0f);
+			GL.ClearColor(0.2f, 0.2f, 0.4f, 1.0f);
 			GL.Clear (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		}
 		public override void OnRender (FrameEventArgs e)
@@ -386,9 +366,6 @@ namespace Opuz2015
 						puzzle.SelectedPiece = p;
 						p.ResetVisitedStatus ();
 						p.PutOnTop ();
-						Point<float> c = p.Bounds.Center;
-						//selMesh = new vaoMesh (c.X, c.Y, 15f, 50f, 50f);
-						selMesh = new vaoMesh (c.X, c.Y, 0f, p.Bounds.Width, p.Bounds.Height);
 						p.ResetVisitedStatus ();
 						p.Move (0f, 0f, zSelPce);
 						break;
@@ -412,8 +389,6 @@ namespace Opuz2015
 			
 			puzzle.SelectedPiece.ResetVisitedStatus ();
 			puzzle.SelectedPiece.Move (0f, 0f, -zSelPce);
-			selMesh.Dispose ();
-			selMesh = null;
 			puzzle.SelectedPiece.ResetVisitedStatus ();
 			puzzle.SelectedPiece.Test ();
 			puzzle.SelectedPiece.ResetVisitedStatus ();

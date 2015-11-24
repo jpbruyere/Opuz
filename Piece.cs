@@ -161,7 +161,7 @@ namespace Opuz2015
 			}
 
 			rotationRef = pcr;
-			Animation.StartAnimation(new Animation<float> (this, "Angle", target, 0.3f));
+			Animation.StartAnimation(new Animation<float> (this, "Angle", target, 0.2f));
 
 			for (int i = 0; i < IsLinked.Length; i++) {
 				if (!IsLinked [i])
