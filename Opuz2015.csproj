@@ -76,13 +76,13 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="lib\Crow\Crow.csproj">
+      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
+      <Name>Crow</Name>
+    </ProjectReference>
     <ProjectReference Include="lib\GGL\GGL.csproj">
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
-    </ProjectReference>
-    <ProjectReference Include="lib\GOLib\GOLib.csproj">
-      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
-      <Name>GOLib</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>
