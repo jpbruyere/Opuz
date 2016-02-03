@@ -1,9 +1,8 @@
 ﻿<?xml version="1.0"?>
 <Border BorderWidth="2" Width="0" Height="0" Margin="100" Background="0,5;0,5;0,7;0,7" CornerRadius="10">
 	<ListBox Data="{Images}" Width="0" Height="0"
-		ItemTemplate="#Opuz2015.ui.imgItem.goml"
-		Template="#go.Templates.ScrollingListBox.goml" 
+		Template="#Crow.Templates.ScrollingListBox.goml"
 		SelectedItemChanged="onSelectedImageChanged"
+		ItemTemplate="#Opuz2015.ui.imgItem.goml"
 		/>
-		 	
 </Border>

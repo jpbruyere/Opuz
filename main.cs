@@ -402,7 +402,7 @@ namespace Opuz2015
 		}
 
 		void Mouse_Move(object sender, MouseMoveEventArgs e)
-		{
+		{			
 			if (!puzzleIsReady)
 				return;
 			if (e.XDelta != 0 || e.YDelta != 0)

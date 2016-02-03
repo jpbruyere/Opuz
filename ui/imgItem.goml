@@ -1,4 +1,4 @@
 ﻿<?xml version="1.0"?>
-<Image Fit="true" Path="{}" MaximumSize="280;280" Focusable="true"
+<Image Fit="true" Scaled="true" KeepProportions="true" Path="{}" MaximumSize="280;200" Focusable="true"
 			MouseEnter="{Background=BlueCrayola}"
 			MouseLeave="{Background=Transparent}"/>
