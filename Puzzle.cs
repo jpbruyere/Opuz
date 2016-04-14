@@ -252,10 +252,10 @@ namespace Opuz2015
 			lock (Mutex) {
 				tmp = ZOrderedPieces.ToArray();
 			}
-			GL.ActiveTexture (TextureUnit.Texture0);
-			GL.BindTexture(TextureTarget.Texture2D, Image);
 			GL.ActiveTexture (TextureUnit.Texture1);
 			GL.BindTexture(TextureTarget.Texture2D, profileTexture);
+			GL.ActiveTexture (TextureUnit.Texture0);
+			GL.BindTexture(TextureTarget.Texture2D, Image);
 					
 			foreach (Piece p in tmp)
 				p.Render ();	

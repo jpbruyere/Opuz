@@ -19,50 +19,14 @@ using System.IO;
 
 namespace Opuz2015
 {
-	class MainWin : OpenTKGameWindow, IValueChange
+	public enum GameState { Init, CutStart, CutFinished, Play, Finished};
+
+	class MainWin : OpenTKGameWindow, IBindable
 	{
-		#region IValueChange implementation
-		public event EventHandler<ValueChangeEventArgs> ValueChanged;
-		public void NotifyValueChanged(string name, object value)
-		{
-			ValueChanged.Raise (this, new ValueChangeEventArgs (name, value));
-		}
-		#endregion
-
-		#region FPS
-		int _fps = 0;
-
-		public int fps {
-			get { return _fps; }
-			set {
-				if (_fps == value)
-					return;
-
-				_fps = value;
-
-				if (_fps > fpsMax) {
-					fpsMax = _fps;
-					ValueChanged.Raise(this, new ValueChangeEventArgs ("fpsMax", fpsMax));
-				} else if (_fps < fpsMin) {
-					fpsMin = _fps;
-					ValueChanged.Raise(this, new ValueChangeEventArgs ("fpsMin", fpsMin));
-				}
-
-				ValueChanged.Raise(this, new ValueChangeEventArgs ("fps", _fps));
-				ValueChanged.Raise (this, new ValueChangeEventArgs ("update",
-					this.updateTime.ElapsedMilliseconds.ToString () + " ms"));
-			}
-		}
-
-		public int fpsMin = 1000;
-		public int fpsMax = 0;
-		public string update = "";
-
-		void resetFps ()
-		{
-			fpsMin = int.MaxValue;
-			fpsMax = 0;
-			_fps = 0;
+		#region IBindable implementation
+		List<Binding> bindings = new List<Binding> ();
+		public List<Binding> Bindings {
+			get { return bindings; }
 		}
 		#endregion
 
@@ -95,22 +59,10 @@ namespace Opuz2015
 		public static GameLib.EffectShader selMeshShader;
 		public static GameLib.EffectShader RedFillShader;
 
-		public void ActivateMainShader()
-		{
-			mainShader.Enable ();
-			mainShader.Color = Color.White;
-			mainShader.ColorMultiplier = 1f;
-			mainShader.ImgSize = new Vector2 (puzzle.Image.Width, puzzle.Image.Height);
-			mainShader.ProjectionMatrix = projection;
-			mainShader.ModelViewMatrix = modelview;
-			mainShader.ModelMatrix = Matrix4.Identity;
-
-		}
-
 		void initOpenGL()
 		{			
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
-			GL.DepthFunc(DepthFunction.Less);
+			GL.DepthFunc(DepthFunction.Lequal);
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace (CullFaceMode.Front);
 
@@ -123,8 +75,6 @@ namespace Opuz2015
 
 			selMeshShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
 			RedFillShader = new GameLib.EffectShader ("Opuz2015.shaders.red");
-
-			GL.ActiveTexture (TextureUnit.Texture0);
 
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");	
@@ -140,35 +90,26 @@ namespace Opuz2015
 		void initInterface(){
 			//special event handlers fired only if mouse not in interface objects
 			//for scene mouse handling
-			this.MouseWheelChanged += new EventHandler<MouseWheelEventArgs>(Mouse_WheelChanged);
-			this.MouseMove += new EventHandler<MouseMoveEventArgs>(Mouse_Move);
-			this.MouseButtonDown += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonDown);
-			this.MouseButtonUp += new EventHandler<MouseButtonEventArgs>(Mouse_ButtonUp);
+			MouseMove += Mouse_Move;
+			MouseButtonDown += Mouse_ButtonDown;
+			MouseButtonUp += Mouse_ButtonUp;
+			MouseWheelChanged += Mouse_WheelChanged;
+			//KeyboardKeyDown += MainWin_KeyboardKeyDown;
 
-			LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
-			mainMenu = LoadInterface("#Opuz2015.ui.MainMenu.goml");
+			//CrowInterface.LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
+			mainMenu = CrowInterface.LoadInterface("#Opuz2015.ui.MainMenu.goml");
 			mainMenu.DataSource = this;
-			finishedMessage = LoadInterface ("#Opuz2015.ui.Finished.goml");
+			finishedMessage = CrowInterface.LoadInterface("#Opuz2015.ui.Finished.goml");
 			finishedMessage.DataSource = this;
-			finishedMessage.Visible = false;			
-		}
+			finishedMessage.Visible = false;
 
-		void onNbPceXChanged (object sender, ValueChangeEventArgs e)
-		{
-			if (e.MemberName != "Value")
-				return;
-			nbPceX = Convert.ToInt32(e.NewValue);
+			Crow.CompilerServices.ResolveBindings (this.Bindings);
 		}
-		void onNbPceYChanged (object sender, ValueChangeEventArgs e)
-		{
-			if (e.MemberName != "Value")
-				return;
-			nbPceY = Convert.ToInt32(e.NewValue);
-		}
-		void onImageClick (object sender, MouseButtonEventArgs e){
+			
+		void onImageClick (object sender, Crow.MouseButtonEventArgs e){
 			mainMenu.Visible = false;
 			if (imgSelection == null) {
-				imgSelection = this.LoadInterface ("#Opuz2015.ui.ImageSelect.goml");
+				imgSelection = CrowInterface.LoadInterface ("#Opuz2015.ui.ImageSelect.goml");
 				imgSelection.DataSource = this;
 			}else
 				imgSelection.Visible = true;
@@ -178,26 +119,22 @@ namespace Opuz2015
 			imgSelection.Visible = false;
 			ImagePath = e.NewValue.ToString();
 		}
-		void onCutPuzzle (object sender, MouseButtonEventArgs e)
+		void onCutPuzzle (object sender, Crow.MouseButtonEventArgs e)
 		{
 			mainMenu.Visible = false;
-			if (puzzle != null)
-				puzzle.Dispose();
-			puzzle = new Puzzle (NbPceX, NbPceY, ImagePath);
-			puzzle.Shuffle();
-			eyeDistTarget = puzzle.Image.Width*1.5f;
-			EyeDist = eyeDistTarget;
+			currentState = GameState.CutStart;
 		}
-		void onButQuitClick (object sender, MouseButtonEventArgs e){
+		void onButQuitClick (object sender, Crow.MouseButtonEventArgs e){
 			closeGame ();
 
 		}
-		void onBackToMainMenu (object sender, MouseButtonEventArgs e)
+		void onBackToMainMenu (object sender, Crow.MouseButtonEventArgs e)
 		{
 			closeCurrentPuzzle ();
 		}
 		#endregion
 
+		GameState currentState = GameState.Init;
 		Puzzle puzzle;
 
 		int nbPceX = 5;
@@ -220,6 +157,8 @@ namespace Opuz2015
 				return nbPceX;
 			}
 			set {
+				if (value == nbPceX)
+					return;
 				nbPceX = value;
 				NotifyValueChanged ("NbPceX", nbPceX);
 			}
@@ -227,6 +166,8 @@ namespace Opuz2015
 		public int NbPceY {
 			get { return nbPceY; }
 			set { 
+				if (value == nbPceY)
+					return;
 				nbPceY = value;
 				NotifyValueChanged ("NbPceY", nbPceY);
 			}
@@ -246,7 +187,10 @@ namespace Opuz2015
 			if (!puzzle.Ready)
 				return;
 			
-			ActivateMainShader ();
+			mainShader.Enable ();
+			mainShader.Color = new Vector4 (1, 1, 1, 1);
+			mainShader.ColorMultiplier = 1f;
+			mainShader.Model = Matrix4.Identity;
 
 			puzzle.Render ();
 		}
@@ -254,7 +198,7 @@ namespace Opuz2015
 		void closeGame(){
 			if (puzzle != null)
 				puzzle.Dispose();
-			this.Quit ();
+			this.Quit (null,null);
 		}
 		void closeCurrentPuzzle(){
 			finishedMessage.Visible = false;
@@ -294,13 +238,28 @@ namespace Opuz2015
 		{
 			base.OnUpdateFrame (e);
 
-			fps = (int)RenderFrequency;
-			if (frameCpt > 200) {
-				resetFps ();
-				frameCpt = 0;
-
+			switch (currentState) {
+			case GameState.Init:
+				
+				return;
+			case GameState.CutStart:
+				if (puzzle != null)
+					puzzle.Dispose ();
+				puzzle = new Puzzle (NbPceX, NbPceY, ImagePath);
+				mainShader.Enable ();
+				mainShader.ImgSize = new Vector2 (puzzle.Image.Width, puzzle.Image.Height);
+				puzzle.Shuffle ();
+				eyeDistTarget = puzzle.Image.Width * 1.5f;
+				EyeDist = eyeDistTarget;
+				currentState = GameState.Play;
+				return;
+			case GameState.CutFinished:
+				return;
+			case GameState.Play:
+				break;
+			case GameState.Finished:
+				break;
 			}
-			frameCpt++;
 
 			GGL.Animation.ProcessAnimations ();
 		}
@@ -316,26 +275,21 @@ namespace Opuz2015
 			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
 			GL.GetInteger(GetPName.Viewport, viewport);
 
-			try {
-				mainShader.ProjectionMatrix = projection;
-				mainShader.ModelViewMatrix = modelview;
-				mainShader.ModelMatrix = Matrix4.Identity;
-			} catch (Exception ex) {
-				Debug.WriteLine ("UpdateViewMatrices: failed to set shader matrices: " + ex.Message);
-			}
+			mainShader.Enable ();
+			mainShader.SetMVP(modelview * projection);
 		}
 		#endregion
 
 		#region Keyboard
-		protected override void OnKeyDown (KeyboardKeyEventArgs e)
+		protected override void OnKeyDown (OpenTK.Input.KeyboardKeyEventArgs e)
 		{
 			base.OnKeyDown (e);
 			switch (e.Key) {
-			case Key.Space:
+			case OpenTK.Input.Key.Space:
 				if (puzzle != null)
 					puzzle.resolve ();
 				break;
-			case Key.Escape:
+			case OpenTK.Input.Key.Escape:
 				if (puzzleIsReady)
 					closeCurrentPuzzle ();
 				else
@@ -346,12 +300,12 @@ namespace Opuz2015
 		#endregion
 
 		#region Mouse
-		void Mouse_ButtonDown (object sender, MouseButtonEventArgs e)
+		void Mouse_ButtonDown (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{
 			if (!puzzleIsReady)
 				return;
 
-			if (e.Button == MouseButton.Left) {
+			if (e.Button == OpenTK.Input.MouseButton.Left) {
 				Point<float> mPos = new Point<float> (e.X, e.Y);
 				mPos.Y = viewport [3] - mPos.Y;
 				Piece[] tmp = null;
@@ -371,7 +325,7 @@ namespace Opuz2015
 						break;
 					}
 				}
-			} else if (e.Button == MouseButton.Right) {
+			} else if (e.Button == OpenTK.Input.MouseButton.Right) {
 				if (puzzle.SelectedPiece == null)
 					return;
 				puzzle.SelectedPiece.ResetVisitedStatus ();
@@ -379,12 +333,12 @@ namespace Opuz2015
 			}
 
 		}
-		void Mouse_ButtonUp (object sender, MouseButtonEventArgs e)
+		void Mouse_ButtonUp (object sender, OpenTK.Input.MouseButtonEventArgs e)
 		{	
 			this.CursorVisible = true;	
 			if (!puzzleIsReady)
 				return;	
-			if (puzzle.SelectedPiece == null || e.Button != MouseButton.Left)
+			if (puzzle.SelectedPiece == null || e.Button != OpenTK.Input.MouseButton.Left)
 				return;
 			
 			puzzle.SelectedPiece.ResetVisitedStatus ();
@@ -401,7 +355,7 @@ namespace Opuz2015
 			puzzle.SelectedPiece = null;
 		}
 
-		void Mouse_Move(object sender, MouseMoveEventArgs e)
+		void Mouse_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
 		{			
 			if (!puzzleIsReady)
 				return;
@@ -417,7 +371,7 @@ namespace Opuz2015
 					UpdateViewMatrix ();
 					return;
 				}
-				if (e.Mouse.LeftButton == ButtonState.Pressed) {
+				if (e.Mouse.LeftButton == OpenTK.Input.ButtonState.Pressed) {
 					if (puzzle.SelectedPiece != null) {						
 						Piece p = puzzle.SelectedPiece;
 						p.ResetVisitedStatus ();
@@ -425,7 +379,7 @@ namespace Opuz2015
 						return;
 					}
 				}
-				if (e.Mouse.RightButton == ButtonState.Pressed) {
+				if (e.Mouse.RightButton == OpenTK.Input.ButtonState.Pressed) {
 					Matrix4 m = Matrix4.CreateTranslation (-e.XDelta, e.YDelta, 0);
 					vEyeTarget = Vector3.Transform (vEyeTarget, m);
 					UpdateViewMatrix();
@@ -435,14 +389,14 @@ namespace Opuz2015
 			}
 
 		}			
-		void Mouse_WheelChanged(object sender, MouseWheelEventArgs e)
+		void Mouse_WheelChanged(object sender, OpenTK.Input.MouseWheelEventArgs e)
 		{
 			if (!puzzleIsReady)
 				return;
 			float speed = MoveSpeed;
-			if (Keyboard[Key.ShiftLeft])
+			if (Keyboard[OpenTK.Input.Key.ShiftLeft])
 				speed *= 0.1f;
-			else if (Keyboard[Key.ControlLeft])
+			else if (Keyboard[OpenTK.Input.Key.ControlLeft])
 				speed *= 20.0f;
 
 			eyeDistTarget -= e.Delta * speed;
@@ -456,7 +410,7 @@ namespace Opuz2015
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800,"test")
+			: base(1024, 800,32,24,0,8,"Opuz")
 		{}
 
 		[STAThread]

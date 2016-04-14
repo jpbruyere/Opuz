@@ -1,20 +1,22 @@
 ﻿<?xml version="1.0"?>
-<Border BorderWidth="2" Fit="true" Background="vgradient|0:BlueCrayola|1:0,5;0,5;0,7;0,2" CornerRadius="30">
-	<VerticalStack Fit="true" Margin="20" Spacing="10">
-		<Label Text="Opuz" Font="RothenburgDecorative, 110" Margin="36"/>
-		<Border Fit="true" Margin="5" CornerRadius="10" BorderWidth="1" BorderColor="DimGray"
+<Border BorderWidth="2" Height="80%" Width="60%" Background="vgradient|0:BlueCrayola|1:0,5;0,5;0,7;0,2" CornerRadius="30">
+	<VerticalStack Height="95%" Width="95%">
+		<Image Path="#Opuz2015.Images.title.svg" Height="30%" Width="Stretched"/>
+		<Border Height="40%" Width="80%" Margin="5" CornerRadius="10" BorderWidth="1" BorderColor="DimGray"
 				MouseEnter="{Background=BlueCrayola}"
 				MouseLeave="{Background=Transparent}">
-			<Image Width="300" Height="200" Path="{ImagePath}" Margin="5" Focusable="true"
+			<Image Path="{ImagePath}" Margin="5" Focusable="true"
 					MouseClick="onImageClick"/>
 		</Border>
-		<HorizontalStack Fit="true" Margin="5" Background="vgradient|0:White|0,1:GoldMetallic|0,9:GoldMetallic|1:Black" CornerRadius="10">
-			<Label Text="Dimensions:" Font="OrangeJuice, 26" Margin="5"/>
-			<Spinner Width="50" Minimum="2" Maximum="100" Value="{NbPceX}" ValueChanged="onNbPceXChanged"/>
-			<Label Text="x" Font="OrangeJuice, 26" Margin="5"/>
-			<Spinner Width="50" Minimum="2" Maximum="100" Value="{NbPceY}" ValueChanged="onNbPceYChanged"/>
+		<HorizontalStack Height="20%" Width="60%" Margin="5" CornerRadius="10">
+			<Label Width="50%" HorizontalStretch="true" Text="Dimensions:" Font="OrangeJuice, 26" Margin="5"/>
+			<Spinner Margin="10" Template="#Opuz2015.ui.tmpSpinner.crow" Height="Stretched" Width="20%"
+				Value="{²NbPceX}" Minimum="2" Maximum="100"/>
+			<Label Width="10%" HorizontalStretch="true" Text="x" Font="OrangeJuice, 26" Margin="5" />
+			<Spinner Margin="10" Template="#Opuz2015.ui.tmpSpinner.crow" Height="Stretched" Width="20%"
+				Value="{²NbPceY}" Minimum="2" Maximum="100"/>
 		</HorizontalStack>
-		<HorizontalStack Fit="true" Margin="5" HorizontalAlignment="Right">
+		<HorizontalStack Height="10%" Width="Fit" Margin="5" HorizontalAlignment="Right">
 			<Button  Fit="True" Caption="Start" Font="RothenburgDecorative, 30" Margin="10"
 						MouseClick="onCutPuzzle"/>
 			<Button  Fit="True" Caption="Quit" Font="RothenburgDecorative,30" Margin="10"

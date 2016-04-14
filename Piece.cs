@@ -286,26 +286,27 @@ namespace Opuz2015
 		}
 		public void RenderShadow(){
 
-			MainWin.mainShader.ModelMatrix = Transformations * Matrix4.CreateTranslation(-puzzle.PieceThickness,-puzzle.PieceThickness,0);
+			MainWin.mainShader.Model = Transformations * Matrix4.CreateTranslation(-puzzle.PieceThickness,-puzzle.PieceThickness,0);
 			MainWin.mainShader.ColorMultiplier = 1.0f;
-			MainWin.mainShader.Color = Color.Black;
+			MainWin.mainShader.Color = new Vector4 (0, 0, 0, 1);
+
 			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
 				DrawElementsType.UnsignedInt, IndFill);
 		}
 		public void Render(){
-			MainWin.mainShader.ModelMatrix = Transformations;
+			MainWin.mainShader.Model = Transformations;
 			MainWin.mainShader.ColorMultiplier = colorMultiplier;
 
 			//border, only when not linked
 			for (int i = 0; i < puzzle.nbSides; i++) {
 				if (IsLinked [i])
 					continue;
-				MainWin.mainShader.Color = Color.DimGray;
+				MainWin.mainShader.Color = new Vector4 (0.4f, 0.4f, 0.4f, 1);
 				GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder[i].Length,
 					DrawElementsType.UnsignedInt, IndBorder[i]);				
 			}
 			//face
-			MainWin.mainShader.Color = Color.White;
+			MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
 			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
 				DrawElementsType.UnsignedInt, IndFill);
 		}
@@ -330,8 +331,8 @@ namespace Opuz2015
 		Rectangle<float> getProjectedBounds()
 		{
 			Matrix4 M = Transformations *
-			            MainWin.mainShader.ModelViewMatrix *
-			            MainWin.mainShader.ProjectionMatrix;
+			            MainWin.modelview *
+			            MainWin.projection;
 			Rectangle<float> projR = Rectangle<float>.Zero;
 			Point<float> topLeft, bottomRight;
 
