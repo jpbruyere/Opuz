@@ -415,11 +415,11 @@ namespace Opuz2015
 
 			GL.Disable (EnableCap.CullFace);
 
-			MainWin.RedFillShader.Enable ();
 			MainWin.RedFillShader.ProjectionMatrix = Matrix4.CreateOrthographicOffCenter 
 				(0, Image.Width, 0, Image.Height, 0, 1);
 			MainWin.RedFillShader.ModelViewMatrix = Matrix4.Identity;
 			MainWin.RedFillShader.ModelMatrix = Matrix4.Identity;
+			MainWin.RedFillShader.Enable ();
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
 			float[] cc = new float[4];
