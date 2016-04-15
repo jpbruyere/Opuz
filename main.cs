@@ -43,6 +43,8 @@ namespace Opuz2015
 			} 
 		}
 		public Vector3 vEyeTarget = new Vector3(0, 0, 0f);
+		public Vector3 vEye;
+		public Vector3 vLookInit = Vector3.Normalize(new Vector3(0.0f, -0.7f, 0.7f));
 		public Vector3 vLook = Vector3.Normalize(new Vector3(0.0f, -0.1f, 0.9f));  // Camera vLook Vector
 		public float zFar = 6000.0f;
 		public float zNear = 1.0f;
@@ -52,6 +54,10 @@ namespace Opuz2015
 		float eyeDistTarget = 1000f;
 		float MoveSpeed = 100.0f;
 		float RotationSpeed = 0.02f;
+		float ZoomSpeed = 2f;
+		float viewZangle, viewXangle;
+
+		public Vector4 vLight = new Vector4 (0.5f, 0.5f, -1f, 0f);
 		#endregion
 
 		#region GL
@@ -271,7 +277,11 @@ namespace Opuz2015
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);
 			projection = Matrix4.CreatePerspectiveFieldOfView (fovY, r.Width / (float)r.Height, zNear, zFar);
-			Vector3 vEye = vEyeTarget + vLook * eyeDist;
+			vLook = Vector3.Transform (vLookInit,
+				Matrix4.CreateRotationX (viewXangle)*
+				Matrix4.CreateRotationZ (viewZangle));
+			vLook.Normalize();
+			vEye = vEyeTarget + vLook * eyeDist;
 			modelview = Matrix4.LookAt(vEye, vEyeTarget, Vector3.UnitZ);
 			GL.GetInteger(GetPName.Viewport, viewport);
 
@@ -362,12 +372,12 @@ namespace Opuz2015
 			if (e.XDelta != 0 || e.YDelta != 0)
 			{
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
-					Vector3 tmp = Vector3.Transform (vLook, 
-						Matrix4.CreateRotationX (-e.YDelta * RotationSpeed));
-					tmp.Normalize();
-					if (tmp.Y >= 0f || tmp.Z <= 0f)
-						return;
-					vLook = tmp;
+					//viewZangle -= (float)e.XDelta * RotationSpeed;
+					viewXangle -= (float)e.YDelta * RotationSpeed;
+					if (viewXangle < - 0.75f)
+						viewXangle = -0.75f;
+					else if (viewXangle > MathHelper.PiOver4)
+						viewXangle = MathHelper.PiOver4;
 					UpdateViewMatrix ();
 					return;
 				}
