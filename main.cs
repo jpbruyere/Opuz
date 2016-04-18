@@ -105,13 +105,15 @@ namespace Opuz2015
 			//CrowInterface.LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
 			mainMenu = CrowInterface.LoadInterface("#Opuz2015.ui.MainMenu.goml");
 			mainMenu.DataSource = this;
-			finishedMessage = CrowInterface.LoadInterface("#Opuz2015.ui.Finished.goml");
-			finishedMessage.DataSource = this;
-			finishedMessage.Visible = false;
+			mainMenu.Visible = false;
 
 			Crow.CompilerServices.ResolveBindings (this.Bindings);
+			mainMenu.Visible = true;
 		}
-			
+		void showFinishedMsg(){
+			finishedMessage = CrowInterface.LoadInterface("#Opuz2015.ui.Finished.goml");
+			finishedMessage.DataSource = this;
+		}
 		void onImageClick (object sender, Crow.MouseButtonEventArgs e){
 			mainMenu.Visible = false;
 			if (imgSelection == null) {
@@ -207,7 +209,10 @@ namespace Opuz2015
 			this.Quit (null,null);
 		}
 		void closeCurrentPuzzle(){
-			finishedMessage.Visible = false;
+			if (finishedMessage != null) {
+				CrowInterface.DeleteWidget (finishedMessage);
+				finishedMessage = null;
+			}
 			mainMenu.Visible = true;
 			if (puzzle != null)
 				puzzle.Dispose();
@@ -246,7 +251,6 @@ namespace Opuz2015
 
 			switch (currentState) {
 			case GameState.Init:
-				
 				return;
 			case GameState.CutStart:
 				if (puzzle != null)
@@ -357,7 +361,7 @@ namespace Opuz2015
 			puzzle.SelectedPiece.Test ();
 			puzzle.SelectedPiece.ResetVisitedStatus ();
 			if (puzzle.SelectedPiece.PuzzleIsFinished) {
-				finishedMessage.Visible = true;
+				showFinishedMsg ();
 			}
 			//ensure newly linked pce are on top of others
 			puzzle.SelectedPiece.ResetVisitedStatus ();

@@ -81,7 +81,6 @@
     <EmbeddedResource Include="shaders\puzzle.frag" />
     <EmbeddedResource Include="shaders\puzzle.vert" />
     <EmbeddedResource Include="shaders\Border.frag" />
-    <EmbeddedResource Include="ui\fps.goml" />
     <EmbeddedResource Include="ui\MainMenu.goml" />
     <EmbeddedResource Include="ui\Finished.goml" />
     <EmbeddedResource Include="shaders\red.frag" />
@@ -89,24 +88,53 @@
     <EmbeddedResource Include="ui\imgItem.goml" />
     <EmbeddedResource Include="ui\tmpSpinner.crow" />
     <EmbeddedResource Include="Images\title.svg" />
+    <EmbeddedResource Include="ui\tmpWindow.crow" />
+    <EmbeddedResource Include="ui\fps.crow" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="Images\1.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="Images\2.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="Images\0.jpg">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
-    <None Include="Images\namur.jpg">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
     <None Include="ui\options.crow" />
     <None Include="ui\Splash.crow" />
+    <None Include="Images\Trafalgar-Auguste_Mayer.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\Westminster.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\Chateau-de-Chambord.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\6.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\7.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\11.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\16.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\17.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\18.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\19.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Images\21.jpg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\Crow\Crow.csproj">

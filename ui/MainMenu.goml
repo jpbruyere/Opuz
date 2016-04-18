@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Border BorderWidth="2" Height="80%" Width="60%" Background="vgradient|0:BlueCrayola|1:0,5;0,5;0,7;0,2" CornerRadius="30">
+<Border BorderWidth="2" Height="80%" Width="60%" Background="vgradient|0:BlueCrayola|1:0,1;0,1;0,4;1,0" CornerRadius="30">
 	<VerticalStack Height="95%" Width="95%">
 		<Image Path="#Opuz2015.Images.title.svg" Height="30%" Width="Stretched"/>
 		<Border Height="40%" Width="80%" Margin="5" CornerRadius="10" BorderWidth="1" BorderColor="DimGray"
