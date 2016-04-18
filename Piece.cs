@@ -32,11 +32,11 @@ namespace Opuz2015
 	public class Piece 
 	{
 		#region CTOR
-		public Piece (Puzzle _puzzle, List<int> _indicesBorder)
+		public Piece (Puzzle _puzzle, List<uint> _indices)
 		{
 			puzzle = _puzzle;
-			IndProfile = _indicesBorder.ToArray ();
-			IndFill = earTriangulation(_indicesBorder);
+			IndProfile = _indices.ToArray ();
+			IndFill = earTriangulation(_indices);
 			computeBounds ();
 
 			IsLinked = Enumerable.Repeat(false, puzzle.nbSides).ToArray();
@@ -57,10 +57,13 @@ namespace Opuz2015
 		float colorMultiplier = 1f;
 
 		#region Pubilc Properties
+		public int IndFillPtr, indFillLength;
+		public int[] IndBorderPtr, indBorderLength;
+
 		public Rectangle<float> Bounds;
-		public int[][] IndBorder;
-		public int[] IndProfile;
-		public int[] IndFill;
+		public uint[][] IndBorder;
+		public uint[] IndProfile;
+		public uint[] IndFill;
 		public Matrix4 Transformations{
 			get {
 				if (!transformationsAreUpToDate) {
@@ -78,6 +81,8 @@ namespace Opuz2015
 		public float Angle {
 			get { return angle; }
 			set {
+				if (angle == value)
+					return;
 				//rotate dx and dy by difference
 				float deltaAngle = value - angle;
 				if (rotationRef != this && rotationRef != null) {
@@ -94,6 +99,9 @@ namespace Opuz2015
 				else
 					angle = value;
 				
+				if (!puzzle.Selection.Contains (this))
+					MainWin.RebuildCache = true;
+				
 				transformationsAreUpToDate = false;
 			}
 		}
@@ -105,7 +113,11 @@ namespace Opuz2015
 		{ 
 			get { return dx; }
 			set {
+				if (dx == value)
+					return;
 				dx = value;
+//				if (puzzle.Selection.Contains (this))
+//					MainWin.RebuildCache = true;
 				transformationsAreUpToDate = false;
 			}
 		}
@@ -114,12 +126,22 @@ namespace Opuz2015
 			get { return dy; }
 			set {
 				dy = value;
+//				if (puzzle.Selection.Contains (this))
+//					MainWin.RebuildCache = true;
 				transformationsAreUpToDate = false;
 			}
 		}
 		public float Dz 
 		{ 
 			get { return dz; }
+			set {
+				if (dz == value)
+					return;
+				dz = value;
+//				if (puzzle.Selection.Contains (this))
+//					MainWin.RebuildCache = true;
+				transformationsAreUpToDate = false;
+			}
 		}
 		public float ColorMultiplier {
 			get {
@@ -127,6 +149,7 @@ namespace Opuz2015
 			}
 			set {
 				colorMultiplier = value;
+				MainWin.RebuildCache = true;
 			}
 		}
 		#endregion
@@ -179,7 +202,7 @@ namespace Opuz2015
 			dx += _dispX;
 			dy += _dispY;
 			dz += _dispZ;
-
+			
 			for (int i = 0; i < IsLinked.Length; i++) {
 				if (!IsLinked [i])
 					continue;
@@ -193,7 +216,7 @@ namespace Opuz2015
 			if (Visited)
 				return;
 			Visited = true;
-
+			MainWin.RebuildCache = true;
 			lock (puzzle.Mutex) {
 				puzzle.ZOrderedPieces.Remove (this);
 				puzzle.ZOrderedPieces.Add(this);
@@ -204,7 +227,22 @@ namespace Opuz2015
 				Neighbours [i].PutOnTop();
 			}
 		}
-			
+		/// <summary>
+		/// Build selected pces list recursively
+		/// </summary>
+		public void UpdateSelection()
+		{
+			if (Visited)
+				return;
+			Visited = true;
+
+			puzzle.Selection.Add (this);
+			for (int i = 0; i < IsLinked.Length; i++) {
+				if (!IsLinked [i])
+					continue;
+				Neighbours [i].UpdateSelection ();
+			}
+		}
 		/// <summary>
 		/// rotated delta between centers of tested pce, kept global in pce class to compute it only once.
 		/// </summary>
@@ -288,16 +326,17 @@ namespace Opuz2015
 				return true;
 			return false;
 		}
-		public void RenderShadow(){
-
-			MainWin.mainShader.Model = Transformations * Matrix4.CreateTranslation(-puzzle.PieceThickness,-puzzle.PieceThickness,0);
-			MainWin.mainShader.ColorMultiplier = 1.0f;
-			MainWin.mainShader.Color = new Vector4 (0, 0, 0, 1);
-
-			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
-				DrawElementsType.UnsignedInt, IndFill);
-		}
+//		public void RenderShadow(){
+//
+//			MainWin.mainShader.Model = Transformations * Matrix4.CreateTranslation(-puzzle.PieceThickness,-puzzle.PieceThickness,0);
+//			MainWin.mainShader.ColorMultiplier = 1.0f;
+//			MainWin.mainShader.Color = new Vector4 (0, 0, 0, 1);
+//
+//			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
+//				DrawElementsType.UnsignedInt, IndFill);
+//		}
 		public void Render(){
+			MainWin.mainShader.Color = new Vector4 (0.4f, 0.4f, 0.4f, 1);
 			MainWin.mainShader.Model = Transformations;
 			MainWin.mainShader.ColorMultiplier = colorMultiplier;
 
@@ -305,14 +344,13 @@ namespace Opuz2015
 			for (int i = 0; i < puzzle.nbSides; i++) {
 				if (IsLinked [i])
 					continue;
-				MainWin.mainShader.Color = new Vector4 (0.4f, 0.4f, 0.4f, 1);
 				GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder[i].Length,
-					DrawElementsType.UnsignedInt, IndBorder[i]);				
+					DrawElementsType.UnsignedInt, IndBorder[i]);
 			}
 			//face
-			MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
-			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
-				DrawElementsType.UnsignedInt, IndFill);
+//			MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
+//			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
+//				DrawElementsType.UnsignedInt, IndFill);
 		}
 		public void RenderProfile(){
 			GL.DrawElements (PrimitiveType.LineLoop, IndProfile.Length,
@@ -336,20 +374,20 @@ namespace Opuz2015
 		#region triangulation and bounds calculations
 		public void ComputeBorderIndices()
 		{
-			IndBorder = new int[puzzle.nbSides][];
+			IndBorder = new uint[puzzle.nbSides][];
 
-			int ptr = 0;
-			for (int c = 0; c < puzzle.nbSides; c++) {
+			uint ptr = 0;
+			for (uint c = 0; c < puzzle.nbSides; c++) {
 				int nbp = puzzle.cutter.NbPoints;
 				if (Neighbours [c] == null)
 					nbp = 1;
-				IndBorder [c] = new int[nbp*2+2];
-				for (int i = 0; i < nbp; i++) {
+				IndBorder [c] = new uint[nbp*2+2];
+				for (uint i = 0; i < nbp; i++) {
 					IndBorder [c] [i * 2] = IndProfile [ptr+i] + puzzle.BorderOffset;
 					IndBorder [c] [i * 2 + 1] = IndProfile [ptr+i];
 				}
 				if (c < puzzle.nbSides - 1)
-					ptr += nbp;
+					ptr += (uint)nbp;
 				else
 					ptr = 0;
 				IndBorder [c][nbp*2] = IndProfile [ptr] + puzzle.BorderOffset;
@@ -377,11 +415,11 @@ namespace Opuz2015
 			Bounds = new Rectangle<float> (minX, minY, maxX - minX, maxY - minY);
 		}
 
-		int[] earTriangulation(List<int> tril)
+		uint[] earTriangulation(List<uint> tril)
 		{
 			Vector3[] positions = puzzle.positions;
 			//triangles list
-			List<int> indices = new List<int> ();
+			List<uint> indices = new List<uint> ();
 
 			int p0 = 0, p1, p2;
 
@@ -390,8 +428,8 @@ namespace Opuz2015
 				p2 = cyclingIncrementer (p1, tril.Count-1);
 
 				if (Vector3.Cross (
-					positions [tril [p1]] - positions [tril [p0]], 
-					positions [tril [p2]] - positions [tril [p0]]).Z > 0) {
+					positions [tril [p1]] - positions [(int)tril [p0]], 
+					positions [(int)tril [p2]] - positions [(int)tril [p0]]).Z > 0) {
 
 					bool theresPointsInsideTri = false;
 
@@ -399,10 +437,10 @@ namespace Opuz2015
 						if (i == p0 || i == p1 || i == p2)
 							continue;
 						if (!PointIsInTriangle (
-							positions [tril [i]],
-							positions [tril [p0]],
-							positions [tril [p1]],
-							positions [tril [p2]]))
+							positions [(int)tril [i]],
+							positions [(int)tril [p0]],
+							positions [(int)tril [p1]],
+							positions [(int)tril [p2]]))
 							continue;
 						theresPointsInsideTri = true;
 						break;
@@ -414,7 +452,7 @@ namespace Opuz2015
 						indices.Add (tril [p2]);
 						indices.Add (tril [p1]);
 
-						tril.RemoveAt (p1);
+						tril.RemoveAt ((int)p1);
 
 						if (p0 == tril.Count)
 							p0 = 0;

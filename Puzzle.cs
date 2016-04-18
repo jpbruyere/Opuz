@@ -96,12 +96,13 @@ namespace Opuz2015
 		int vaoHandle,
 		positionVboHandle,
 		normalsVboHandle,
+		eboHandle,
 		texVboHandle;
 
 		public Vector3[] positions;
 		public Vector3[] normals;
 		public Vector2[] texCoords;
-		public int[] indices;
+		public uint[] indices;
 
 		void CreateVBOs()
 		{
@@ -196,7 +197,7 @@ namespace Opuz2015
 
 			Vector3[] bord = tmp.ToArray ();
 			transform (ref bord, Matrix4.CreateTranslation (0, 0, -PieceThickness));
-			BorderOffset = tmp.Count;
+			BorderOffset = (uint)tmp.Count;
 
 			Array.Copy (tmp.ToArray (), 0, positions, 0, tmp.Count);
 			Array.Copy (bord, 0, positions, BorderOffset, tmp.Count);
@@ -208,13 +209,56 @@ namespace Opuz2015
 
 			createProfileTexture ();
 
+			List<uint> indicesList = new List<uint>();
+			foreach (Piece p in ZOrderedPieces) {
+				p.IndFillPtr = indicesList.Count * sizeof(uint);
+				p.indFillLength = p.IndFill.Length + 1;
+
+				indicesList.AddRange (p.IndFill);
+				indicesList.Add (uint.MaxValue);
+
+				p.IndBorderPtr = new int[nbSides];
+				p.indBorderLength = new int[nbSides];
+				for (int i = 0; i < nbSides; i++) {
+					p.IndBorderPtr[i] = indicesList.Count * sizeof(uint);
+					p.indBorderLength [i] = p.IndBorder [i].Length;
+					indicesList.AddRange (p.IndBorder [i]);
+					indicesList.Add (uint.MaxValue);
+				}
+			}
+			indices = indicesList.ToArray ();
+			eboHandle = GL.GenBuffer ();
+			GL.BindVertexArray(vaoHandle);
+			GL.BindBuffer (BufferTarget.ElementArrayBuffer, eboHandle);
+			GL.BufferData (BufferTarget.ElementArrayBuffer,
+				new IntPtr (sizeof(uint) * indices.Length),
+				indices, BufferUsageHint.StaticDraw);			
+			GL.BindVertexArray(0);
 			Ready = true;
 		}
 		#endregion
 
-		internal int BorderOffset = 0;
+		internal uint BorderOffset = 0;
 
-		public Piece SelectedPiece = null;
+		public List<Piece> Selection = new List<Piece>();
+		Piece selectedPiece = null;
+		public Piece SelectedPiece{
+			get { return selectedPiece; }
+			set {
+				if (selectedPiece == value)
+					return;
+
+				Selection.Clear ();
+				selectedPiece = value;
+				MainWin.RebuildCache = true;
+
+				if (selectedPiece == null)					
+					return;
+				
+				selectedPiece.ResetVisitedStatus ();
+				selectedPiece.UpdateSelection ();
+			}
+		}
 
 		static Random rnd = new Random();
 		public void Shuffle()
@@ -244,24 +288,46 @@ namespace Opuz2015
 				p.Dy = c.Y;
 			}
 		}
+		public void Render(Piece[] pces){
+			GL.CullFace (CullFaceMode.Front);
 
-		public void Render(){
 			GL.BindVertexArray(vaoHandle);
 
-			Piece[] tmp = null;
-			lock (Mutex) {
-				tmp = ZOrderedPieces.ToArray();
-			}
 			GL.ActiveTexture (TextureUnit.Texture1);
 			GL.BindTexture(TextureTarget.Texture2D, profileTexture);
 			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, Image);
-					
-			foreach (Piece p in tmp)
-				p.Render ();	
+
+			foreach (Piece p in pces) {
+				MainWin.mainShader.Color = new Vector4 (0.4f, 0.4f, 0.4f, 1);
+				MainWin.mainShader.Model = p.Transformations;
+				MainWin.mainShader.ColorMultiplier = p.ColorMultiplier;
+
+				//border, only when not linked
+				for (int i = 0; i < nbSides; i++) {
+					if (p.IsLinked [i])
+						continue;
+					GL.DrawElements (PrimitiveType.TriangleStrip, p.indBorderLength[i],
+						DrawElementsType.UnsignedInt, p.IndBorderPtr[i]);
+				}
+
+				MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
+
+				GL.DrawElements (PrimitiveType.Triangles, p.indFillLength,
+					DrawElementsType.UnsignedInt, p.IndFillPtr);
+			}
 
 			GL.BindVertexArray (0);
 			GL.BindTexture(TextureTarget.Texture2D, 0);
+
+			GL.CullFace (CullFaceMode.Back);
+		}
+		public void Render(){
+			Piece[] tmp = null;
+			lock (Mutex) {
+				tmp = ZOrderedPieces.Except(Selection).ToArray();
+			}
+			Render (tmp);
 		}
 
 		#region Cutting
@@ -282,22 +348,22 @@ namespace Opuz2015
 				//int ptr1 = (nbPieceY-1) * (nbPieceX * Cut.NbPoints + 1) + 2 * (nbPieceX + 1) + nbPieceY + 1;
 				int ptr3 = ptrV0;
 				for (int x = 0; x < nbPieceX; x++) {
-					List<int> ind = new List<int>();
+					List<uint> ind = new List<uint>();
 
 					//indice du bord sup
 					if (y == 0) {
-						ind.Add (ptr0);
+						ind.Add ((uint)ptr0);
 						ptr0++;
 					} else {						
-						ind.AddRange (Enumerable.Range(ptr0, cutter.NbPoints).ToArray());
+						ind.AddRange (Enumerable.Range(ptr0, cutter.NbPoints).Select(i => (uint)i).ToArray());
 						ptr0 += cutter.NbPoints;
 					}
 					//indice du bord droit
 					if (x == nbPieceX - 1) {
-						ind.Add (ptr1 + y);
+						ind.Add ((uint)(ptr1 + y));
 						ptr1++;
 					} else {						
-						ind.AddRange (Enumerable.Range(ptr1 + y * cutter.NbPoints, cutter.NbPoints).ToArray());
+						ind.AddRange (Enumerable.Range(ptr1 + y * cutter.NbPoints, cutter.NbPoints).Select(i => (uint)i).ToArray());
 						ptr1 += cutter.NbPoints * nbPieceY ;
 					}
 					//
@@ -306,17 +372,17 @@ namespace Opuz2015
 						if (x == nbPieceX - 1)
 							ind.Add (BorderOffset - 1);
 						else
-							ind.Add (ptr2+1);
-						ind.Add (ptr2);
+							ind.Add ((uint)(ptr2+1));
+						ind.Add ((uint)ptr2);
 						ptr2++;
 					} else {
 						if (x == nbPieceX - 1)
-							ind.Add (ptr1 + y);
+							ind.Add ((uint)(ptr1 + y));
 						else
-							ind.Add (ptr2 + cutter.NbPoints);
+							ind.Add ((uint)(ptr2 + cutter.NbPoints));
 
-						ind.AddRange (Enumerable.Range(ptr2+1, cutter.NbPoints - 1).Reverse().ToArray());
-						ind.Add (ptr2);//1st point of left border
+						ind.AddRange (Enumerable.Range(ptr2+1, cutter.NbPoints - 1).Reverse().Select(i => (uint)i).ToArray());
+						ind.Add ((uint)ptr2);//1st point of left border
 						ptr2 += cutter.NbPoints;
 					}
 
@@ -325,7 +391,7 @@ namespace Opuz2015
 						ptr3 += nbPieceY ;
 					else if (x > 0 ) {
 						//						ind.Add (ptr3 + Cut.NbPoints);
-						ind.AddRange (Enumerable.Range(ptr3+y*cutter.NbPoints+1, cutter.NbPoints-1).Reverse().ToArray());
+						ind.AddRange (Enumerable.Range(ptr3+y*cutter.NbPoints+1, cutter.NbPoints-1).Reverse().Select(i => (uint)i).ToArray());
 						ptr3 += cutter.NbPoints * nbPieceY ;
 					}
 
@@ -386,16 +452,13 @@ namespace Opuz2015
 		{
 			int fbo;
 			profileTexture = new Texture (Image.Width, Image.Height);
-			int stride = 4 * Image.Width;
-			int bmpSize = Math.Abs (stride) * Image.Height;
-			byte[] bmp = new byte[bmpSize];
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, profileTexture);
 
 			GL.TexImage2D(TextureTarget.Texture2D, 0, PixelInternalFormat.Rgba, 
 				Image.Width, Image.Height, 0,
-				OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, bmp);
+				OpenTK.Graphics.OpenGL.PixelFormat.Bgra, PixelType.UnsignedByte, IntPtr.Zero);
 
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMinFilter, (int)TextureMinFilter.Linear);
 			GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMagFilter, (int)TextureMagFilter.Linear);

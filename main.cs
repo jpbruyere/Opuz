@@ -63,8 +63,9 @@ namespace Opuz2015
 		#region GL
 		public static PuzzleShader mainShader;
 		static RenderCache mainCache;
+		public static bool RebuildCache = false;
 
-		public static GameLib.EffectShader selMeshShader;
+		//public static GameLib.EffectShader selMeshShader;
 		public static GameLib.EffectShader RedFillShader;
 
 		void initOpenGL()
@@ -74,7 +75,7 @@ namespace Opuz2015
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace (CullFaceMode.Back);
 
-			GL.PrimitiveRestartIndex (int.MaxValue);
+			GL.PrimitiveRestartIndex (uint.MaxValue);
 			GL.Enable (EnableCap.PrimitiveRestart);
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
@@ -193,25 +194,21 @@ namespace Opuz2015
 		}			
 
 		void updateCache(){
-			mainCache.Bind (true);
-			GL.CullFace (CullFaceMode.Front);
-			draw ();
-			GL.CullFace (CullFaceMode.Back);
-			GL.BindFramebuffer (FramebufferTarget.Framebuffer, 0);
-		}
-		void draw()
-		{
 			if (puzzle == null)
 				return;
 			if (!puzzle.Ready)
 				return;
 			
+			mainCache.Bind (true);
 			mainShader.Enable ();
 			mainShader.Color = new Vector4 (1, 1, 1, 1);
 			mainShader.ColorMultiplier = 1f;
 			mainShader.Model = Matrix4.Identity;
 
 			puzzle.Render ();
+
+			GL.BindFramebuffer (FramebufferTarget.Framebuffer, 0);
+			RebuildCache = false;
 		}
 
 		void closeGame(){
@@ -220,6 +217,8 @@ namespace Opuz2015
 			this.Quit (null,null);
 		}
 		void closeCurrentPuzzle(){
+			currentState = GameState.Init;
+
 			if (finishedMessage != null) {
 				CrowInterface.DeleteWidget (finishedMessage);
 				finishedMessage = null;
@@ -252,6 +251,8 @@ namespace Opuz2015
 
 			mainCache.PaintCache ();
 
+			mainShader.Enable ();
+			puzzle.Render (puzzle.Selection.ToArray ());
 		}
 		protected override void OnResize (EventArgs e)
 		{
@@ -277,6 +278,7 @@ namespace Opuz2015
 				eyeDistTarget = puzzle.Image.Width * 1.5f;
 				EyeDist = eyeDistTarget;
 				currentState = GameState.Play;
+				RebuildCache = true;
 				return;
 			case GameState.CutFinished:
 				return;
@@ -284,7 +286,8 @@ namespace Opuz2015
 
 			GGL.Animation.ProcessAnimations ();
 
-			updateCache ();
+			if (RebuildCache)
+				updateCache ();
 
 		}
 		#endregion
@@ -305,6 +308,7 @@ namespace Opuz2015
 
 			mainShader.Enable ();
 			mainShader.SetMVP(modelview * projection);
+			RebuildCache = true;
 		}
 		#endregion
 
@@ -360,8 +364,7 @@ namespace Opuz2015
 
 		}
 		void Mouse_ButtonUp (object sender, OpenTK.Input.MouseButtonEventArgs e)
-		{	
-			this.CursorVisible = true;	
+		{				
 			if (!puzzleIsReady)
 				return;	
 			if (puzzle.SelectedPiece == null || e.Button != OpenTK.Input.MouseButton.Left)
