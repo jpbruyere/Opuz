@@ -32,11 +32,11 @@ namespace Opuz2015
 	public class Piece 
 	{
 		#region CTOR
-		public Piece (Puzzle _puzzle, List<int> _indicesBorder)
+		public Piece (Puzzle _puzzle, List<uint> _indices)
 		{
 			puzzle = _puzzle;
-			IndProfile = _indicesBorder.ToArray ();
-			IndFill = earTriangulation(_indicesBorder);
+			IndProfile = _indices.ToArray ();
+			IndFill = earTriangulation(_indices);
 			computeBounds ();
 
 			IsLinked = Enumerable.Repeat(false, puzzle.nbSides).ToArray();
@@ -57,10 +57,12 @@ namespace Opuz2015
 		float colorMultiplier = 1f;
 
 		#region Pubilc Properties
+		public int IndFillPtr, indFillLength;
+
 		public Rectangle<float> Bounds;
-		public int[][] IndBorder;
-		public int[] IndProfile;
-		public int[] IndFill;
+		public uint[][] IndBorder;
+		public uint[] IndProfile;
+		public uint[] IndFill;
 		public Matrix4 Transformations{
 			get {
 				if (!transformationsAreUpToDate) {
@@ -288,16 +290,17 @@ namespace Opuz2015
 				return true;
 			return false;
 		}
-		public void RenderShadow(){
-
-			MainWin.mainShader.Model = Transformations * Matrix4.CreateTranslation(-puzzle.PieceThickness,-puzzle.PieceThickness,0);
-			MainWin.mainShader.ColorMultiplier = 1.0f;
-			MainWin.mainShader.Color = new Vector4 (0, 0, 0, 1);
-
-			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
-				DrawElementsType.UnsignedInt, IndFill);
-		}
+//		public void RenderShadow(){
+//
+//			MainWin.mainShader.Model = Transformations * Matrix4.CreateTranslation(-puzzle.PieceThickness,-puzzle.PieceThickness,0);
+//			MainWin.mainShader.ColorMultiplier = 1.0f;
+//			MainWin.mainShader.Color = new Vector4 (0, 0, 0, 1);
+//
+//			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
+//				DrawElementsType.UnsignedInt, IndFill);
+//		}
 		public void Render(){
+			MainWin.mainShader.Color = new Vector4 (0.4f, 0.4f, 0.4f, 1);
 			MainWin.mainShader.Model = Transformations;
 			MainWin.mainShader.ColorMultiplier = colorMultiplier;
 
@@ -305,14 +308,13 @@ namespace Opuz2015
 			for (int i = 0; i < puzzle.nbSides; i++) {
 				if (IsLinked [i])
 					continue;
-				MainWin.mainShader.Color = new Vector4 (0.4f, 0.4f, 0.4f, 1);
 				GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder[i].Length,
 					DrawElementsType.UnsignedInt, IndBorder[i]);				
 			}
 			//face
-			MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
-			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
-				DrawElementsType.UnsignedInt, IndFill);
+//			MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
+//			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
+//				DrawElementsType.UnsignedInt, IndFill);
 		}
 		public void RenderProfile(){
 			GL.DrawElements (PrimitiveType.LineLoop, IndProfile.Length,
@@ -336,20 +338,20 @@ namespace Opuz2015
 		#region triangulation and bounds calculations
 		public void ComputeBorderIndices()
 		{
-			IndBorder = new int[puzzle.nbSides][];
+			IndBorder = new uint[puzzle.nbSides][];
 
-			int ptr = 0;
-			for (int c = 0; c < puzzle.nbSides; c++) {
+			uint ptr = 0;
+			for (uint c = 0; c < puzzle.nbSides; c++) {
 				int nbp = puzzle.cutter.NbPoints;
 				if (Neighbours [c] == null)
 					nbp = 1;
-				IndBorder [c] = new int[nbp*2+2];
-				for (int i = 0; i < nbp; i++) {
+				IndBorder [c] = new uint[nbp*2+2];
+				for (uint i = 0; i < nbp; i++) {
 					IndBorder [c] [i * 2] = IndProfile [ptr+i] + puzzle.BorderOffset;
 					IndBorder [c] [i * 2 + 1] = IndProfile [ptr+i];
 				}
 				if (c < puzzle.nbSides - 1)
-					ptr += nbp;
+					ptr += (uint)nbp;
 				else
 					ptr = 0;
 				IndBorder [c][nbp*2] = IndProfile [ptr] + puzzle.BorderOffset;
@@ -377,11 +379,11 @@ namespace Opuz2015
 			Bounds = new Rectangle<float> (minX, minY, maxX - minX, maxY - minY);
 		}
 
-		int[] earTriangulation(List<int> tril)
+		uint[] earTriangulation(List<uint> tril)
 		{
 			Vector3[] positions = puzzle.positions;
 			//triangles list
-			List<int> indices = new List<int> ();
+			List<uint> indices = new List<uint> ();
 
 			int p0 = 0, p1, p2;
 
@@ -390,8 +392,8 @@ namespace Opuz2015
 				p2 = cyclingIncrementer (p1, tril.Count-1);
 
 				if (Vector3.Cross (
-					positions [tril [p1]] - positions [tril [p0]], 
-					positions [tril [p2]] - positions [tril [p0]]).Z > 0) {
+					positions [tril [p1]] - positions [(int)tril [p0]], 
+					positions [(int)tril [p2]] - positions [(int)tril [p0]]).Z > 0) {
 
 					bool theresPointsInsideTri = false;
 
@@ -399,10 +401,10 @@ namespace Opuz2015
 						if (i == p0 || i == p1 || i == p2)
 							continue;
 						if (!PointIsInTriangle (
-							positions [tril [i]],
-							positions [tril [p0]],
-							positions [tril [p1]],
-							positions [tril [p2]]))
+							positions [(int)tril [i]],
+							positions [(int)tril [p0]],
+							positions [(int)tril [p1]],
+							positions [(int)tril [p2]]))
 							continue;
 						theresPointsInsideTri = true;
 						break;
@@ -414,7 +416,7 @@ namespace Opuz2015
 						indices.Add (tril [p2]);
 						indices.Add (tril [p1]);
 
-						tril.RemoveAt (p1);
+						tril.RemoveAt ((int)p1);
 
 						if (p0 == tril.Count)
 							p0 = 0;
