@@ -52,6 +52,7 @@ namespace Opuz2015
 
 		bool transformationsAreUpToDate = false;
 		Matrix4 transformations = Matrix4.Identity;
+		Matrix4 transformationsInverse = Matrix4.Identity;
 
 		float colorMultiplier = 1f;
 
@@ -68,6 +69,7 @@ namespace Opuz2015
 						Matrix4.CreateTranslation (-c.X, -c.Y, 0) *
 						Matrix4.CreateRotationZ (angle) *					
 						Matrix4.CreateTranslation(dx, dy, dz);
+					transformationsInverse = transformations.Inverted ();
 					transformationsAreUpToDate = true;
 				}
 				return transformations;
@@ -242,11 +244,13 @@ namespace Opuz2015
 				return true;
 			}
 		}
-
+		public void Highlight(float _colorMultiplier, float _step = 0.5f){
+			Animation.StartAnimation (new Animation<float> (this, "ColorMultiplier", _colorMultiplier,_step), 0, onColorMultAnimEnd);
+		}
 		public void Bind(int i)
 		{			
 			IsLinked [i] = true;
-			Animation.StartAnimation (new Animation<float> (this, "ColorMultiplier", 2f,0.5f), 0, onColorMultAnimEnd);
+			Highlight (2f, 0.5f);
 			Piece p = Neighbours [i];
 			p.ResetVisitedStatus ();
 			p.Move (Dx - p.Dx -cDelta.X, Dy - p.Dy- cDelta.Y);
@@ -322,39 +326,10 @@ namespace Opuz2015
 		}
 
 		#region Mouse handling
-		public bool MouseIsIn(Point<float> m)
-		{
-			Rectangle<float> r = getProjectedBounds ();
-			return r.ContainsOrIsEqual (m);
-		}
-
-		Rectangle<float> getProjectedBounds()
-		{
-			Matrix4 M = Transformations *
-			            MainWin.modelview *
-			            MainWin.projection;
-			Rectangle<float> projR = Rectangle<float>.Zero;
-			Point<float> topLeft, bottomRight;
-
-			if (Angle % MathHelper.Pi == 0) {
-				topLeft = Bounds.TopLeft;
-				bottomRight = Bounds.BottomRight;
-			} else {
-				topLeft = Bounds.BottomLeft;
-				bottomRight = Bounds.TopRight;
-			}
-		
-
-			Point<float> pt1 = glHelper.Project (topLeft, M, MainWin.viewport [2], MainWin.viewport [3]);
-			Point<float> pt2 = glHelper.Project (bottomRight, M, MainWin.viewport [2], MainWin.viewport [3]);
-			if (pt1 < pt2) {
-				projR.TopLeft = pt1;
-				projR.BottomRight = pt2;
-			} else {
-				projR.TopLeft = pt2;
-				projR.BottomRight = pt1;
-			}
-			return projR;
+		public bool MouseIsIn(Vector3 m)
+		{			
+			Vector3 mm = Vector3.Transform(m, transformationsInverse);
+			return Bounds.ContainsOrIsEqual (new Point<float> (mm.X, mm.Y));
 		}
 		#endregion
 

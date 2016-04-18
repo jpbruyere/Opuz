@@ -320,8 +320,6 @@ namespace Opuz2015
 				return;
 
 			if (e.Button == OpenTK.Input.MouseButton.Left) {
-				Point<float> mPos = new Point<float> (e.X, e.Y);
-				mPos.Y = viewport [3] - mPos.Y;
 				Piece[] tmp = null;
 
 				lock (puzzle.Mutex)
@@ -329,7 +327,7 @@ namespace Opuz2015
 				
 				for (int i = tmp.Length-1; i >= 0; i--) {					
 					Piece p = tmp [i];
-					if (p.MouseIsIn (mPos)) {
+					if (p.MouseIsIn (vMousePos)) {
 						//this.CursorVisible = false;
 						puzzle.SelectedPiece = p;
 						p.ResetVisitedStatus ();
@@ -368,13 +366,20 @@ namespace Opuz2015
 			puzzle.SelectedPiece.PutOnTop ();
 			puzzle.SelectedPiece = null;
 		}
-
+		Vector3 vMousePos;
 		void Mouse_Move(object sender, OpenTK.Input.MouseMoveEventArgs e)
 		{			
 			if (!puzzleIsReady)
 				return;
 			if (e.XDelta != 0 || e.YDelta != 0)
-			{
+			{				
+				Vector3 vMouse = glHelper.UnProject(ref projection, ref modelview, viewport, new Vector2 (e.X, e.Y)).Xyz;
+				Vector3 vMouseRay = Vector3.Normalize(vMouse - vEye);
+				float a = -vMouse.Z / vMouseRay.Z;
+				Vector3 vNewMousePos = vMouse + vMouseRay * a;
+				Vector3 vMouseDelta = vNewMousePos - vMousePos;
+				vMousePos = vNewMousePos;
+
 				if (e.Mouse.MiddleButton == OpenTK.Input.ButtonState.Pressed) {
 					//viewZangle -= (float)e.XDelta * RotationSpeed;
 					viewXangle -= (float)e.YDelta * RotationSpeed;
@@ -389,7 +394,7 @@ namespace Opuz2015
 					if (puzzle.SelectedPiece != null) {						
 						Piece p = puzzle.SelectedPiece;
 						p.ResetVisitedStatus ();
-						p.Move ((float)e.XDelta * eyeDist*0.001f, -(float)e.YDelta* eyeDist*0.001f);
+						p.Move (vMouseDelta.X, vMouseDelta.Y);
 						return;
 					}
 				}
@@ -399,7 +404,6 @@ namespace Opuz2015
 					UpdateViewMatrix();
 					return;
 				}
-
 			}
 
 		}			
