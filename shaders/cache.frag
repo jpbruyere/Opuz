@@ -19,8 +19,8 @@ void main(void)
 
 	//float depth = texelFetch (depthTex, texcoord, i).x;
 	vec4 c = texelFetch (tex, texcoord, i);
-	//if (c.a == 0.0)
-	//	discard;
+	if (c.a == 0.0)
+		discard;
 
 	out_frag_color = vec4(c.rgb,1.0);
 }

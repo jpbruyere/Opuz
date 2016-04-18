@@ -19,11 +19,6 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <PlatformTarget>x86</PlatformTarget>
-    <EnvironmentVariables>
-      <EnvironmentVariables>
-        <Variable name="vblank_mode" value="0" />
-      </EnvironmentVariables>
-    </EnvironmentVariables>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <Optimize>true</Optimize>

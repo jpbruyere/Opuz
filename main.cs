@@ -80,6 +80,9 @@ namespace Opuz2015
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
 
+			GL.Enable (EnableCap.SampleShading);
+			GL.MinSampleShading (0.5f);
+
 			mainShader = new PuzzleShader();
 
 			//selMeshShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
@@ -119,13 +122,13 @@ namespace Opuz2015
 			finishedMessage = CrowInterface.LoadInterface("#Opuz2015.ui.Finished.goml");
 			finishedMessage.DataSource = this;
 		}
-		void onImageClick (object sender, Crow.MouseButtonEventArgs e){
-			mainMenu.Visible = false;
+		void onImageClick (object sender, Crow.MouseButtonEventArgs e){			
 			if (imgSelection == null) {
 				imgSelection = CrowInterface.LoadInterface ("#Opuz2015.ui.ImageSelect.goml");
 				imgSelection.DataSource = this;
-			}else
-				imgSelection.Visible = true;
+			}
+			imgSelection.Visible = true;
+			mainMenu.Visible = false;
 		}
 		void onSelectedImageChanged(object sender, SelectionChangeEventArgs e){
 			mainMenu.Visible = true;
@@ -240,7 +243,7 @@ namespace Opuz2015
 		}			
 		public override void GLClear ()
 		{
-			GL.ClearColor(0.2f, 0.2f, 0.4f, 1.0f);
+			GL.ClearColor(0.2f, 0.2f, 0.4f, 0.0f);
 			GL.Clear (ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
 		}
 		public override void OnRender (FrameEventArgs e)
@@ -444,10 +447,9 @@ namespace Opuz2015
 		#endregion
 
 		#region CTOR and Main
-		public MainWin ()
-			: base(1024, 800,32,24, 0, 8, "Opuz")
-		{
-			VSync = VSyncMode.Off;
+		public MainWin (int numSamples = 4)
+			: base(1024, 800,32,24, 0, numSamples, "Opuz")
+		{			
 		}
 
 		[STAThread]

@@ -111,7 +111,7 @@ namespace Opuz2015
 				InternalFormat = PixelInternalFormat.Rgba,
 				PixelFormat = PixelFormat.Bgra,
 				PixelType = PixelType.UnsignedByte,
-				Samples = 2
+				Samples = 4
 			}; colorTex.Create ();
 					
 
