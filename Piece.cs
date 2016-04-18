@@ -58,6 +58,7 @@ namespace Opuz2015
 
 		#region Pubilc Properties
 		public int IndFillPtr, indFillLength;
+		public int[] IndBorderPtr, indBorderLength;
 
 		public Rectangle<float> Bounds;
 		public uint[][] IndBorder;
@@ -309,7 +310,7 @@ namespace Opuz2015
 				if (IsLinked [i])
 					continue;
 				GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder[i].Length,
-					DrawElementsType.UnsignedInt, IndBorder[i]);				
+					DrawElementsType.UnsignedInt, IndBorder[i]);
 			}
 			//face
 //			MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);

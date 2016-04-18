@@ -215,16 +215,25 @@ namespace Opuz2015
 				p.indFillLength = p.IndFill.Length + 1;
 
 				indicesList.AddRange (p.IndFill);
-				indicesList.Add (int.MaxValue);
+				indicesList.Add (uint.MaxValue);
+
+				p.IndBorderPtr = new int[nbSides];
+				p.indBorderLength = new int[nbSides];
+				for (int i = 0; i < nbSides; i++) {
+					p.IndBorderPtr[i] = indicesList.Count * sizeof(uint);
+					p.indBorderLength [i] = p.IndBorder [i].Length;
+					indicesList.AddRange (p.IndBorder [i]);
+					indicesList.Add (uint.MaxValue);
+				}
 			}
 			indices = indicesList.ToArray ();
 			eboHandle = GL.GenBuffer ();
+			GL.BindVertexArray(vaoHandle);
 			GL.BindBuffer (BufferTarget.ElementArrayBuffer, eboHandle);
 			GL.BufferData (BufferTarget.ElementArrayBuffer,
 				new IntPtr (sizeof(uint) * indices.Length),
-				indices, BufferUsageHint.StaticDraw);
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
-
+				indices, BufferUsageHint.StaticDraw);			
+			GL.BindVertexArray(0);
 			Ready = true;
 		}
 		#endregion
@@ -273,24 +282,25 @@ namespace Opuz2015
 			GL.BindTexture(TextureTarget.Texture2D, profileTexture);
 			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, Image);
-					
-			foreach (Piece p in tmp)
-				p.Render ();	
-			
-			MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
 
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, eboHandle);
-
-			foreach (Piece p in tmp) {				
+			foreach (Piece p in tmp) {
+				MainWin.mainShader.Color = new Vector4 (0.4f, 0.4f, 0.4f, 1);
 				MainWin.mainShader.Model = p.Transformations;
 				MainWin.mainShader.ColorMultiplier = p.ColorMultiplier;
+
+				//border, only when not linked
+				for (int i = 0; i < nbSides; i++) {
+					if (p.IsLinked [i])
+						continue;
+					GL.DrawElements (PrimitiveType.TriangleStrip, p.indBorderLength[i],
+						DrawElementsType.UnsignedInt, p.IndBorderPtr[i]);
+				}
+
+				MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
 
 				GL.DrawElements (PrimitiveType.Triangles, p.indFillLength,
 					DrawElementsType.UnsignedInt, p.IndFillPtr);
 			}
-
-
-			GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
 
 			GL.BindVertexArray (0);
 			GL.BindTexture(TextureTarget.Texture2D, 0);

@@ -74,7 +74,7 @@ namespace Opuz2015
 			GL.Enable(EnableCap.CullFace);
 			GL.CullFace (CullFaceMode.Back);
 
-			GL.PrimitiveRestartIndex (int.MaxValue);
+			GL.PrimitiveRestartIndex (uint.MaxValue);
 			GL.Enable (EnableCap.PrimitiveRestart);
 			GL.Enable (EnableCap.Blend);
 			GL.BlendFunc(BlendingFactorSrc.SrcAlpha, BlendingFactorDest.OneMinusSrcAlpha);
