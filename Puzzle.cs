@@ -240,7 +240,25 @@ namespace Opuz2015
 
 		internal uint BorderOffset = 0;
 
-		public Piece SelectedPiece = null;
+		public List<Piece> Selection = new List<Piece>();
+		Piece selectedPiece = null;
+		public Piece SelectedPiece{
+			get { return selectedPiece; }
+			set {
+				if (selectedPiece == value)
+					return;
+
+				Selection.Clear ();
+				selectedPiece = value;
+				MainWin.RebuildCache = true;
+
+				if (selectedPiece == null)					
+					return;
+				
+				selectedPiece.ResetVisitedStatus ();
+				selectedPiece.UpdateSelection ();
+			}
+		}
 
 		static Random rnd = new Random();
 		public void Shuffle()
@@ -270,20 +288,17 @@ namespace Opuz2015
 				p.Dy = c.Y;
 			}
 		}
+		public void Render(Piece[] pces){
+			GL.CullFace (CullFaceMode.Front);
 
-		public void Render(){
 			GL.BindVertexArray(vaoHandle);
 
-			Piece[] tmp = null;
-			lock (Mutex) {
-				tmp = ZOrderedPieces.ToArray();
-			}
 			GL.ActiveTexture (TextureUnit.Texture1);
 			GL.BindTexture(TextureTarget.Texture2D, profileTexture);
 			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, Image);
 
-			foreach (Piece p in tmp) {
+			foreach (Piece p in pces) {
 				MainWin.mainShader.Color = new Vector4 (0.4f, 0.4f, 0.4f, 1);
 				MainWin.mainShader.Model = p.Transformations;
 				MainWin.mainShader.ColorMultiplier = p.ColorMultiplier;
@@ -304,6 +319,15 @@ namespace Opuz2015
 
 			GL.BindVertexArray (0);
 			GL.BindTexture(TextureTarget.Texture2D, 0);
+
+			GL.CullFace (CullFaceMode.Back);
+		}
+		public void Render(){
+			Piece[] tmp = null;
+			lock (Mutex) {
+				tmp = ZOrderedPieces.Except(Selection).ToArray();
+			}
+			Render (tmp);
 		}
 
 		#region Cutting

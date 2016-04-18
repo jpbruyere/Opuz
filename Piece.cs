@@ -81,6 +81,8 @@ namespace Opuz2015
 		public float Angle {
 			get { return angle; }
 			set {
+				if (angle == value)
+					return;
 				//rotate dx and dy by difference
 				float deltaAngle = value - angle;
 				if (rotationRef != this && rotationRef != null) {
@@ -97,6 +99,9 @@ namespace Opuz2015
 				else
 					angle = value;
 				
+				if (!puzzle.Selection.Contains (this))
+					MainWin.RebuildCache = true;
+				
 				transformationsAreUpToDate = false;
 			}
 		}
@@ -108,7 +113,11 @@ namespace Opuz2015
 		{ 
 			get { return dx; }
 			set {
+				if (dx == value)
+					return;
 				dx = value;
+//				if (puzzle.Selection.Contains (this))
+//					MainWin.RebuildCache = true;
 				transformationsAreUpToDate = false;
 			}
 		}
@@ -117,12 +126,22 @@ namespace Opuz2015
 			get { return dy; }
 			set {
 				dy = value;
+//				if (puzzle.Selection.Contains (this))
+//					MainWin.RebuildCache = true;
 				transformationsAreUpToDate = false;
 			}
 		}
 		public float Dz 
 		{ 
 			get { return dz; }
+			set {
+				if (dz == value)
+					return;
+				dz = value;
+//				if (puzzle.Selection.Contains (this))
+//					MainWin.RebuildCache = true;
+				transformationsAreUpToDate = false;
+			}
 		}
 		public float ColorMultiplier {
 			get {
@@ -130,6 +149,7 @@ namespace Opuz2015
 			}
 			set {
 				colorMultiplier = value;
+				MainWin.RebuildCache = true;
 			}
 		}
 		#endregion
@@ -182,7 +202,7 @@ namespace Opuz2015
 			dx += _dispX;
 			dy += _dispY;
 			dz += _dispZ;
-
+			
 			for (int i = 0; i < IsLinked.Length; i++) {
 				if (!IsLinked [i])
 					continue;
@@ -196,7 +216,7 @@ namespace Opuz2015
 			if (Visited)
 				return;
 			Visited = true;
-
+			MainWin.RebuildCache = true;
 			lock (puzzle.Mutex) {
 				puzzle.ZOrderedPieces.Remove (this);
 				puzzle.ZOrderedPieces.Add(this);
@@ -207,7 +227,22 @@ namespace Opuz2015
 				Neighbours [i].PutOnTop();
 			}
 		}
-			
+		/// <summary>
+		/// Build selected pces list recursively
+		/// </summary>
+		public void UpdateSelection()
+		{
+			if (Visited)
+				return;
+			Visited = true;
+
+			puzzle.Selection.Add (this);
+			for (int i = 0; i < IsLinked.Length; i++) {
+				if (!IsLinked [i])
+					continue;
+				Neighbours [i].UpdateSelection ();
+			}
+		}
 		/// <summary>
 		/// rotated delta between centers of tested pce, kept global in pce class to compute it only once.
 		/// </summary>
