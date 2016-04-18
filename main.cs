@@ -62,6 +62,8 @@ namespace Opuz2015
 
 		#region GL
 		public static PuzzleShader mainShader;
+		static RenderCache mainCache;
+
 		public static GameLib.EffectShader selMeshShader;
 		public static GameLib.EffectShader RedFillShader;
 
@@ -70,7 +72,7 @@ namespace Opuz2015
 			GL.ClearColor(0.0f, 0.0f, 0.2f, 1.0f);
 			GL.DepthFunc(DepthFunction.Lequal);
 			GL.Enable(EnableCap.CullFace);
-			GL.CullFace (CullFaceMode.Front);
+			GL.CullFace (CullFaceMode.Back);
 
 			GL.PrimitiveRestartIndex (int.MaxValue);
 			GL.Enable (EnableCap.PrimitiveRestart);
@@ -79,8 +81,10 @@ namespace Opuz2015
 
 			mainShader = new PuzzleShader();
 
-			selMeshShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
+			//selMeshShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
 			RedFillShader = new GameLib.EffectShader ("Opuz2015.shaders.red");
+
+			mainCache = new RenderCache (ClientSize);
 
 			ErrorCode err = GL.GetError ();
 			Debug.Assert (err == ErrorCode.NoError, "OpenGL Error");	
@@ -102,7 +106,7 @@ namespace Opuz2015
 			MouseWheelChanged += Mouse_WheelChanged;
 			//KeyboardKeyDown += MainWin_KeyboardKeyDown;
 
-			//CrowInterface.LoadInterface("#Opuz2015.ui.fps.goml").DataSource = this;
+			CrowInterface.LoadInterface("#Opuz2015.ui.fps.crow").DataSource = this;
 			mainMenu = CrowInterface.LoadInterface("#Opuz2015.ui.MainMenu.goml");
 			mainMenu.DataSource = this;
 			mainMenu.Visible = false;
@@ -187,7 +191,14 @@ namespace Opuz2015
 				NotifyValueChanged ("ImagePath", imagePath);
 			}
 		}			
-			
+
+		void updateCache(){
+			mainCache.Bind (true);
+			GL.CullFace (CullFaceMode.Front);
+			draw ();
+			GL.CullFace (CullFaceMode.Back);
+			GL.BindFramebuffer (FramebufferTarget.Framebuffer, 0);
+		}
 		void draw()
 		{
 			if (puzzle == null)
@@ -235,13 +246,17 @@ namespace Opuz2015
 		}
 		public override void OnRender (FrameEventArgs e)
 		{
-			GL.CullFace (CullFaceMode.Front);
-			draw ();
-			GL.CullFace (CullFaceMode.Back);
+			if (currentState < GameState.Play)
+				return;
+			RenderCache.EnableCacheShader ();
+
+			mainCache.PaintCache ();
+
 		}
 		protected override void OnResize (EventArgs e)
 		{
 			base.OnResize (e);
+			mainCache.CacheSize = ClientSize;
 			UpdateViewMatrix();
 		}
 		int frameCpt = 0;
@@ -265,13 +280,12 @@ namespace Opuz2015
 				return;
 			case GameState.CutFinished:
 				return;
-			case GameState.Play:
-				break;
-			case GameState.Finished:
-				break;
 			}
 
 			GGL.Animation.ProcessAnimations ();
+
+			updateCache ();
+
 		}
 		#endregion
 
@@ -428,8 +442,10 @@ namespace Opuz2015
 
 		#region CTOR and Main
 		public MainWin ()
-			: base(1024, 800,32,24,0,8,"Opuz")
-		{}
+			: base(1024, 800,32,24, 0, 8, "Opuz")
+		{
+			VSync = VSyncMode.Off;
+		}
 
 		[STAThread]
 		static void Main ()

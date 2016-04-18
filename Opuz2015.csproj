@@ -19,6 +19,11 @@
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
     <PlatformTarget>x86</PlatformTarget>
+    <EnvironmentVariables>
+      <EnvironmentVariables>
+        <Variable name="vblank_mode" value="0" />
+      </EnvironmentVariables>
+    </EnvironmentVariables>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
     <Optimize>true</Optimize>
@@ -71,6 +76,7 @@
     <Compile Include="lib\Crow\OTKCrow\OpenTKGameWindow.cs">
       <Link>OpenTKGameWindow.cs</Link>
     </Compile>
+    <Compile Include="RenderCache.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="shaders\" />
@@ -90,6 +96,7 @@
     <EmbeddedResource Include="Images\title.svg" />
     <EmbeddedResource Include="ui\tmpWindow.crow" />
     <EmbeddedResource Include="ui\fps.crow" />
+    <EmbeddedResource Include="shaders\cache.frag" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\2.jpg">
