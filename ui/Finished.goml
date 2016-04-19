@@ -1,13 +1,14 @@
 ﻿<?xml version="1.0"?>
-<Window Font="droid bold, 14" Width="35%" Height="25%"  Title="Puzzle Completed"
-	Template="#Opuz2015.ui.tmpWindow.crow">
-	<Group Width="90%" Height="90%" >
-		<Label Width="90%" Height="Stretched" Text="Congratulations !" TextAlignment="Center"
-			Font="RothenburgDecorative, 32" />
-		<Button Width="40%" Height="Fit" Font="droid bold, 14" Background="DimGray" 
+<Window Font="droid bold, 12" Fit="true"  Title="Completed"
+	CornerRadius="15" Template="#Opuz2015.ui.tmpWindow.crow">
+	<VerticalStack Fit="true">
+		<GraphicObject Height="20"/>
+		<Label Text="Congratulations !" Fit="true" Margin="10"
+			Font="RothenburgDecorative, 26" />
+		<Button Width="100" Height="60" Font="droid bold, 10"
 			HorizontalAlignment="Right" Caption="Menu"
-			VerticalAlignment="Bottom"
-					MouseClick="onBackToMainMenu">
+			Template="#Opuz2015.ui.Button.template"
+			MouseClick="onBackToMainMenu">
 		</Button>
-	</Group>
+	</VerticalStack>
 </Window>

@@ -1,25 +1,27 @@
 ﻿<?xml version="1.0"?>
 <Border BorderWidth="2" Height="80%" Width="60%" Background="vgradient|0:BlueCrayola|1:0,1;0,1;0,4;1,0" CornerRadius="30">
 	<VerticalStack Height="95%" Width="95%">
-		<Image Path="#Opuz2015.Images.title.svg" Height="30%" Width="Stretched"/>
+		<Image Path="#Opuz2015.Images.title.svg" Height="20%" Width="Stretched"/>
 		<Border Height="40%" Width="80%" Margin="5" CornerRadius="10" BorderWidth="1" BorderColor="DimGray"
 				MouseEnter="{Background=BlueCrayola}"
 				MouseLeave="{Background=Transparent}">
 			<Image Path="{ImagePath}" Margin="5" Focusable="true"
 					MouseClick="onImageClick"/>
 		</Border>
-		<HorizontalStack Height="20%" Width="60%" Margin="5" CornerRadius="10">
-			<Label Width="50%" HorizontalStretch="true" Text="Dimensions:" Font="OrangeJuice, 26" Margin="5"/>
+		<HorizontalStack Height="20%" Width="60%" Margin="0" CornerRadius="10">
+			<Label Width="50%" HorizontalStretch="true" Text="Dimensions:" Font="OrangeJuice, 40" Margin="5"/>
 			<Spinner Margin="10" Template="#Opuz2015.ui.tmpSpinner.crow" Height="Stretched" Width="20%"
 				Value="{²NbPceX}" Minimum="2" Maximum="100"/>
-			<Label Width="10%" HorizontalStretch="true" Text="x" Font="OrangeJuice, 26" Margin="5" />
+			<Label Width="10%" HorizontalStretch="true" Text="x" Font="OrangeJuice, 40" Margin="5" />
 			<Spinner Margin="10" Template="#Opuz2015.ui.tmpSpinner.crow" Height="Stretched" Width="20%"
 				Value="{²NbPceY}" Minimum="2" Maximum="100"/>
 		</HorizontalStack>
-		<HorizontalStack Height="10%" Width="Fit" Margin="5" HorizontalAlignment="Right">
-			<Button  Fit="True" Caption="Start" Font="RothenburgDecorative, 30" Margin="10"
+		<HorizontalStack Height="20%" Width="Fit" Margin="0" HorizontalAlignment="Right">
+			<Button  Width="140" Height="Stretched" Caption="Start" Font="RothenburgDecorative, 26" Margin="0"
+					Template="#Opuz2015.ui.Button.template"
 						MouseClick="onCutPuzzle"/>
-			<Button  Fit="True" Caption="Quit" Font="RothenburgDecorative,30" Margin="10"
+			<Button  Width="140" Height="Stretched" Caption="Quit" Font="RothenburgDecorative, 26" Margin="0"
+					Template="#Opuz2015.ui.Button.template"
 						MouseClick="onButQuitClick"/>
 		</HorizontalStack>
 	</VerticalStack>

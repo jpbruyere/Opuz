@@ -1,0 +1,9 @@
+﻿<?xml version="1.0"?>
+<Group MinimumSize="50;20" Height="{../HeightPolicy}" Width="{../WidthPolicy}"
+		Foreground="Transparent" CornerRadius="{../CornerRadius}" 
+	MouseEnter="{caption.Foreground=BlueCrayola}"
+	MouseLeave="{caption.Foreground=DimGray}">
+	<Image KeepProportions="false" Height="Stretched" Width="Stretched" Margin="0" Path="#Opuz2015.Images.button.svg"
+		SvgSub="{../../IsPressed}"/>
+	<Label Font="{../../Font}" Name="caption" Margin="5" Foreground="DimGray" Text="{../../Caption}"/>
+</Group>

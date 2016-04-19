@@ -92,6 +92,9 @@
     <EmbeddedResource Include="ui\tmpWindow.crow" />
     <EmbeddedResource Include="ui\fps.crow" />
     <EmbeddedResource Include="shaders\cache.frag" />
+    <EmbeddedResource Include="ui\Button.template" />
+    <EmbeddedResource Include="Images\button.svg" />
+    <EmbeddedResource Include="ui\Button.style" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\2.jpg">
