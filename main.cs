@@ -66,7 +66,7 @@ namespace Opuz2015
 		public static bool RebuildCache = false;
 
 		//public static GameLib.EffectShader selMeshShader;
-		public static GameLib.EffectShader RedFillShader;
+
 
 		void initOpenGL()
 		{			
@@ -86,7 +86,7 @@ namespace Opuz2015
 			mainShader = new PuzzleShader();
 
 			//selMeshShader = new GameLib.EffectShader ("Opuz2015.shaders.Border");
-			RedFillShader = new GameLib.EffectShader ("Opuz2015.shaders.red");
+
 
 			mainCache = new RenderCache (ClientSize);
 
@@ -119,6 +119,8 @@ namespace Opuz2015
 			mainMenu.Visible = true;
 		}
 		void showFinishedMsg(){
+			if (finishedMessage != null)
+				return;
 			finishedMessage = CrowInterface.LoadInterface("#Opuz2015.ui.Finished.goml");
 			finishedMessage.DataSource = this;
 		}
@@ -263,7 +265,6 @@ namespace Opuz2015
 			mainCache.CacheSize = ClientSize;
 			UpdateViewMatrix();
 		}
-		int frameCpt = 0;
 		protected override void OnUpdateFrame (FrameEventArgs e)
 		{
 			base.OnUpdateFrame (e);
@@ -448,7 +449,7 @@ namespace Opuz2015
 
 		#region CTOR and Main
 		public MainWin (int numSamples = 4)
-			: base(1024, 800,32,24, 0, numSamples, "Opuz")
+			: base(1024, 800, 32, 24, 0, numSamples, "Opuz")
 		{			
 		}
 

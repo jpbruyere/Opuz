@@ -32,12 +32,15 @@ namespace Opuz2015
 	public class Piece 
 	{
 		#region CTOR
-		public Piece (Puzzle _puzzle, List<uint> _indices)
+		public Piece (Puzzle _puzzle, uint _x, uint _y, List<uint> _indices)
 		{
 			puzzle = _puzzle;
-			IndProfile = _indices.ToArray ();
+
+			uint[] ind = _indices.ToArray ();
+			computeBounds (ind);
+			ComputeBorderIndices (_x, _y, ind);
+
 			IndFill = earTriangulation(_indices);
-			computeBounds ();
 
 			IsLinked = Enumerable.Repeat(false, puzzle.nbSides).ToArray();
 			Neighbours = new Piece[puzzle.nbSides];
@@ -62,7 +65,6 @@ namespace Opuz2015
 
 		public Rectangle<float> Bounds;
 		public uint[][] IndBorder;
-		public uint[] IndProfile;
 		public uint[] IndFill;
 		public Matrix4 Transformations{
 			get {
@@ -156,7 +158,6 @@ namespace Opuz2015
 
 		#region Public Functions
 		Piece rotationRef = null;
-
 		public void Rotate(Piece pcr)
 		{
 			if (Visited)
@@ -352,10 +353,6 @@ namespace Opuz2015
 //			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
 //				DrawElementsType.UnsignedInt, IndFill);
 		}
-		public void RenderProfile(){
-			GL.DrawElements (PrimitiveType.LineLoop, IndProfile.Length,
-				DrawElementsType.UnsignedInt, IndProfile);
-		}
 		#endregion
 
 		void  onColorMultAnimEnd(Animation a)
@@ -372,37 +369,55 @@ namespace Opuz2015
 		#endregion
 
 		#region triangulation and bounds calculations
-		public void ComputeBorderIndices()
+		public void ComputeBorderIndices(uint x, uint y, uint[] indProfile)
 		{
 			IndBorder = new uint[puzzle.nbSides][];
 
 			uint ptr = 0;
 			for (uint c = 0; c < puzzle.nbSides; c++) {
 				int nbp = puzzle.cutter.NbPoints;
-				if (Neighbours [c] == null)
-					nbp = 1;
+
+				switch (c) {
+				case 0:
+					if (y == 0)
+						nbp = 1;
+					break;
+				case 1:
+					if (x == puzzle.nbPieceX - 1)
+						nbp = 1;
+					break;
+				case 2:
+					if (y == puzzle.nbPieceY - 1)
+						nbp = 1;
+					break;
+				case 3:
+					if (x == 0)
+						nbp = 1;
+					break;
+				}									
+				
 				IndBorder [c] = new uint[nbp*2+2];
 				for (uint i = 0; i < nbp; i++) {
-					IndBorder [c] [i * 2] = IndProfile [ptr+i] + puzzle.BorderOffset;
-					IndBorder [c] [i * 2 + 1] = IndProfile [ptr+i];
+					IndBorder [c] [i * 2] = indProfile [ptr+i] + puzzle.BorderOffset;
+					IndBorder [c] [i * 2 + 1] = indProfile [ptr+i];
 				}
 				if (c < puzzle.nbSides - 1)
 					ptr += (uint)nbp;
 				else
 					ptr = 0;
-				IndBorder [c][nbp*2] = IndProfile [ptr] + puzzle.BorderOffset;
-				IndBorder [c][nbp*2 + 1] = IndProfile [ptr] ;
+				IndBorder [c][nbp*2] = indProfile [ptr] + puzzle.BorderOffset;
+				IndBorder [c][nbp*2 + 1] = indProfile [ptr] ;
 			}			
 		}
-		void computeBounds()
+		void computeBounds(uint[] indProfile)
 		{
 			float minX = float.MaxValue,
 			maxX = float.MinValue,
 			minY = float.MaxValue,
 			maxY = float.MinValue;
 
-			for (int i = 0; i < IndProfile.Length; i++) {
-				Vector3 p = puzzle.positions [IndProfile [i]];
+			for (int i = 0; i < indProfile.Length; i++) {
+				Vector3 p = puzzle.positions [indProfile [i]];
 				if (p.X < minX)
 					minX = p.X;
 				if (p.X > maxX)

@@ -42,10 +42,13 @@ namespace Opuz2015
 		int _nbPieceY = 3;
 		int _nbSides = 4;
 
+		Piece selectedPiece = null;
+
 
 		public volatile bool Ready = false;
 		public Piece[,] Pieces {get;set;}
 		public List<Piece> ZOrderedPieces;
+		public List<Piece> Selection = new List<Piece>();
 
 		public object Mutex = new object();
 
@@ -89,8 +92,26 @@ namespace Opuz2015
 		public double TolerancePlacementPieces {
 			get { return (largP + hautP) / 30; }
 		}
+		internal uint BorderOffset = 0;
 
 
+		public Piece SelectedPiece{
+			get { return selectedPiece; }
+			set {
+				if (selectedPiece == value)
+					return;
+
+				Selection.Clear ();
+				selectedPiece = value;
+				MainWin.RebuildCache = true;
+
+				if (selectedPiece == null)					
+					return;
+
+				selectedPiece.ResetVisitedStatus ();
+				selectedPiece.UpdateSelection ();
+			}
+		}
 
 		#region VAO
 		int vaoHandle,
@@ -207,8 +228,6 @@ namespace Opuz2015
 
 			createPieces ();
 
-			createProfileTexture ();
-
 			List<uint> indicesList = new List<uint>();
 			foreach (Piece p in ZOrderedPieces) {
 				p.IndFillPtr = indicesList.Count * sizeof(uint);
@@ -238,27 +257,8 @@ namespace Opuz2015
 		}
 		#endregion
 
-		internal uint BorderOffset = 0;
 
-		public List<Piece> Selection = new List<Piece>();
-		Piece selectedPiece = null;
-		public Piece SelectedPiece{
-			get { return selectedPiece; }
-			set {
-				if (selectedPiece == value)
-					return;
 
-				Selection.Clear ();
-				selectedPiece = value;
-				MainWin.RebuildCache = true;
-
-				if (selectedPiece == null)					
-					return;
-				
-				selectedPiece.ResetVisitedStatus ();
-				selectedPiece.UpdateSelection ();
-			}
-		}
 
 		static Random rnd = new Random();
 		public void Shuffle()
@@ -275,9 +275,6 @@ namespace Opuz2015
 			lock(Mutex)
 				ZOrderedPieces.Shuffle ();
 		}
-
-		void resetLinkedPce()
-		{}
 
 		public void resolve()
 		{
@@ -338,18 +335,19 @@ namespace Opuz2015
 			int ptr0 = 0;
 			int ptr2 = nbPieceX;
 
-
 			int ptrV0 = (nbPieceY - 1) * nbPieceX * cutter.NbPoints + 2 * nbPieceX;
 
+			//used to build profile texture
+			List<uint> indProfile = new List<uint> ();
 
 			for (int y = 0; y < nbPieceY; y++) {
 				int ptr1 = ptrV0 + nbPieceY;
 
-				//int ptr1 = (nbPieceY-1) * (nbPieceX * Cut.NbPoints + 1) + 2 * (nbPieceX + 1) + nbPieceY + 1;
 				int ptr3 = ptrV0;
 				for (int x = 0; x < nbPieceX; x++) {
 					List<uint> ind = new List<uint>();
 
+					#region Compute border indices
 					//indice du bord sup
 					if (y == 0) {
 						ind.Add ((uint)ptr0);
@@ -394,10 +392,18 @@ namespace Opuz2015
 						ind.AddRange (Enumerable.Range(ptr3+y*cutter.NbPoints+1, cutter.NbPoints-1).Reverse().Select(i => (uint)i).ToArray());
 						ptr3 += cutter.NbPoints * nbPieceY ;
 					}
+					#endregion
 
-					Pieces [x, y] = new Piece (this, ind);
+					indProfile.AddRange (ind);
+					indProfile.Add (uint.MaxValue);
+
+					Pieces [x, y] = new Piece (this, (uint)x, (uint)y, ind);
+
 				}
 			}
+
+			createProfileTexture (indProfile.ToArray());
+
 			//init neighbourhoud, borders indices, and zordered list
 			ZOrderedPieces = new List<Piece>();
 			for (int y = 0; y < nbPieceY; y++) {
@@ -413,8 +419,6 @@ namespace Opuz2015
 						p.Neighbours [0] = Pieces [x, y - 1];
 					if (x > 0)
 						p.Neighbours [3] = Pieces [x - 1, y];
-
-					p.ComputeBorderIndices ();
 				}
 			}
 		}
@@ -448,7 +452,7 @@ namespace Opuz2015
 
 		#region PROFILE FBO
 		int profileTexture;
-		void createProfileTexture()
+		void createProfileTexture(uint[] indProfile)
 		{
 			int fbo;
 			profileTexture = new Texture (Image.Width, Image.Height);
@@ -478,11 +482,12 @@ namespace Opuz2015
 
 			GL.Disable (EnableCap.CullFace);
 
-			MainWin.RedFillShader.ProjectionMatrix = Matrix4.CreateOrthographicOffCenter 
+			GameLib.EffectShader RedFillShader = new GameLib.EffectShader ("Opuz2015.shaders.red");
+			RedFillShader.ProjectionMatrix = Matrix4.CreateOrthographicOffCenter 
 				(0, Image.Width, 0, Image.Height, 0, 1);
-			MainWin.RedFillShader.ModelViewMatrix = Matrix4.Identity;
-			MainWin.RedFillShader.ModelMatrix = Matrix4.Identity;
-			MainWin.RedFillShader.Enable ();
+			RedFillShader.ModelViewMatrix = Matrix4.Identity;
+			RedFillShader.ModelMatrix = Matrix4.Identity;
+			RedFillShader.Enable ();
 
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, fbo);
 			float[] cc = new float[4];
@@ -495,16 +500,17 @@ namespace Opuz2015
 
 			GL.BindVertexArray(vaoHandle);
 			GL.LineWidth(3);
-			foreach (Piece p in Pieces)
-				p.RenderProfile ();
-			
+			GL.DrawElements (PrimitiveType.LineLoop, indProfile.Length,
+				DrawElementsType.UnsignedInt, indProfile);
 			GL.BindVertexArray (0);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
 			GL.Enable (EnableCap.CullFace);
 			GL.UseProgram (0);
 			GL.ClearColor (cc[0],cc[1],cc[2],cc[3]);
 			GL.Viewport (viewport [0], viewport [1], viewport [2], viewport [3]);			
+
 			GL.DeleteFramebuffer(fbo);
+			RedFillShader.Dispose ();
 		}
 		#endregion
 
