@@ -1,41 +1,25 @@
 Opuz
 =====
-OpenGL puzzle game.
+**Opuz** is the contration of **Opus** and **Puzzle**. It's a small puzzle game developped in a couple of days to test my libraries, but I have to admit puzzle game programming is a recurent test of mine when testing new framework.
+(So I'm maybe now, the fastest puzzle maker in the world :smiley: )
 
-Small game developped in a couple of days to test my libraries.
-
-Building
-========
-
-On debian, check several cil bindings:
-```
-sudo apt-get install libmono-cairo4.0-cil libglib3.0-cil librsvg2-2.18-cil
-```
-
+###Building from sources
 
 ```
-git clone --recursive https://github.com/jpbruyere/Opuz.git   	# Download sources from git
-cd Opuz/lib/opentk                                              
-nuget restor OpenTK.sln                                         # Update nuget packages
-xbuild  /p:Configuration=Release OpenTK.sln                     # build opentk
-cd ../..
-xbuild  /p:Configuration=Release Opuz2015.sln                   # build Opuz
+git clone https://github.com/jpbruyere/Opuz.git   	# Download sources
+cd Opuz
+git submodule update --init --recursive             # Get submodules
+xbuild  /p:Configuration=Release Opuz2015.sln       # Build
 ```
+The resulting executable will be in **build/Release**.
 
 
-note:
------
+> note:
+> I use special fonts that maybe not available on your system :
+> - Rothenburg Decorative
+> - Orange Juice
 
-I use special fonts that maybe not available on your system,
-I have to improve font handling in GOLib to use fallback ones if not found.
-
-Fonts are:
-- Rothenburg Decorative
-- Orange Juice
-
-Screenshot
-==========
-
+###Screenshot
 ![Opuz](/Screenshot.png?raw=true "Opuz")
 
 
