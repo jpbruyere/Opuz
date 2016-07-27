@@ -1,7 +1,7 @@
 Opuz
 =====
 **Opuz** is the contration of **Opus** and **Puzzle**. It's a small puzzle game developped in a couple of days to test my libraries, but I have to admit puzzle game programming is a recurent test of mine when testing new framework.
-(So I'm maybe now, the fastest puzzle game make in the world :smiley: )
+(So I'm maybe now, the fastest puzzle game maker in the world :smiley: )
 
 ###Building from sources
 
