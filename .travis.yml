@@ -1,0 +1,8 @@
+language: csharp
+solution: Opuz2015.sln
+install:
+      - git submodule update --init --recursive
+      - nuget restore Opuz2015.sln
+script:
+      - xbuild /p:Configuration=Release Opuz2015.sln
+
