@@ -4,7 +4,7 @@
 	<VerticalStack Fit="true">
 		<GraphicObject Height="20"/>
 		<Label Text="Congratulations !" Fit="true" Margin="10"
-			Font="RothenburgDecorative, 26" />
+			Font="droid bold, 26" />
 		<Button Width="100" Height="60" Font="droid bold, 10"
 			HorizontalAlignment="Right" Caption="Menu"
 			Template="#Opuz2015.ui.Button.template"

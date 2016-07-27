@@ -9,18 +9,18 @@
 					MouseClick="onImageClick"/>
 		</Border>
 		<HorizontalStack Height="20%" Width="60%" Margin="0" CornerRadius="10">
-			<Label Width="50%" HorizontalStretch="true" Text="Dimensions:" Font="OrangeJuice, 40" Margin="5"/>
+			<Label Width="50%" HorizontalStretch="true" Text="Dimensions:" Font="droid, 40" Margin="5"/>
 			<Spinner Margin="10" Template="#Opuz2015.ui.tmpSpinner.crow" Height="Stretched" Width="20%"
 				Value="{²NbPceX}" Minimum="2" Maximum="100"/>
-			<Label Width="10%" HorizontalStretch="true" Text="x" Font="OrangeJuice, 40" Margin="5" />
+			<Label Width="10%" HorizontalStretch="true" Text="x" Font="droid, 40" Margin="5" />
 			<Spinner Margin="10" Template="#Opuz2015.ui.tmpSpinner.crow" Height="Stretched" Width="20%"
 				Value="{²NbPceY}" Minimum="2" Maximum="100"/>
 		</HorizontalStack>
 		<HorizontalStack Height="20%" Width="Fit" Margin="0" HorizontalAlignment="Right">
-			<Button  Width="140" Height="Stretched" Caption="Start" Font="RothenburgDecorative, 26" Margin="0"
+			<Button  Width="140" Height="Stretched" Caption="Start" Font="droid, 26" Margin="0"
 					Template="#Opuz2015.ui.Button.template"
 						MouseClick="onCutPuzzle"/>
-			<Button  Width="140" Height="Stretched" Caption="Quit" Font="RothenburgDecorative, 26" Margin="0"
+			<Button  Width="140" Height="Stretched" Caption="Quit" Font="droid, 26" Margin="0"
 					Template="#Opuz2015.ui.Button.template"
 						MouseClick="onButQuitClick"/>
 		</HorizontalStack>
