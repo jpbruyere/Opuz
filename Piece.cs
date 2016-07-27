@@ -88,10 +88,10 @@ namespace Opuz2015
 				//rotate dx and dy by difference
 				float deltaAngle = value - angle;
 				if (rotationRef != this && rotationRef != null) {
-					Vector3 rotatedDxDy = Vector3.Transform (new Vector3 (Dx, Dy, 0),
+					Vector3 rotatedDxDy = Vector4.Transform (new Vector4 (Dx, Dy, 0,1),
 						Matrix4.CreateTranslation (-rotationRef.Dx, -rotationRef.Dy, 0) *
 						Matrix4.CreateRotationZ (deltaAngle) *
-						Matrix4.CreateTranslation (rotationRef.Dx, rotationRef.Dy, 0));
+						Matrix4.CreateTranslation (rotationRef.Dx, rotationRef.Dy, 0)).Xyz;
 					Dx = rotatedDxDy.X ;
 					Dy = rotatedDxDy.Y ;
 				}
@@ -320,7 +320,7 @@ namespace Opuz2015
 			if (Angle != p.Angle)
 				return false;
 			cDelta = Bounds.Center - p.Bounds.Center;
-			cDelta = Vector3.Transform (cDelta, Matrix4.CreateRotationZ (Angle));
+			cDelta = cDelta.Transform (Matrix4.CreateRotationZ (Angle));
 			if (
 				Math.Abs (Dx - p.Dx-cDelta.X) < puzzle.TolerancePlacementPieces &&
 				Math.Abs (Dy - p.Dy-cDelta.Y) < puzzle.TolerancePlacementPieces)
@@ -363,7 +363,7 @@ namespace Opuz2015
 		#region Mouse handling
 		public bool MouseIsIn(Vector3 m)
 		{			
-			Vector3 mm = Vector3.Transform(m, transformationsInverse);
+			Vector3 mm = m.Transform (transformationsInverse);
 			return Bounds.ContainsOrIsEqual (new Point<float> (mm.X, mm.Y));
 		}
 		#endregion

@@ -28,6 +28,14 @@ namespace Opuz2015
 		public List<Binding> Bindings {
 			get { return bindings; }
 		}
+		public object DataSource {
+			get {
+				throw new NotImplementedException ();
+			}
+			set {
+				throw new NotImplementedException ();
+			}
+		}
 		#endregion
 
 		#region  scene matrix and vectors
@@ -302,7 +310,7 @@ namespace Opuz2015
 			Rectangle r = this.ClientRectangle;
 			GL.Viewport( r.X, r.Y, r.Width, r.Height);
 			projection = Matrix4.CreatePerspectiveFieldOfView (fovY, r.Width / (float)r.Height, zNear, zFar);
-			vLook = Vector3.Transform (vLookInit,
+			vLook = vLookInit.Transform (
 				Matrix4.CreateRotationX (viewXangle)*
 				Matrix4.CreateRotationZ (viewZangle));
 			vLook.Normalize();
@@ -421,7 +429,7 @@ namespace Opuz2015
 				}
 				if (e.Mouse.RightButton == OpenTK.Input.ButtonState.Pressed) {
 					Matrix4 m = Matrix4.CreateTranslation (-e.XDelta, e.YDelta, 0);
-					vEyeTarget = Vector3.Transform (vEyeTarget, m);
+					vEyeTarget = vEyeTarget.Transform (m);
 					UpdateViewMatrix();
 					return;
 				}
@@ -448,8 +456,8 @@ namespace Opuz2015
 		#endregion
 
 		#region CTOR and Main
-		public MainWin (int numSamples = 4)
-			: base(1024, 800, 32, 24, 0, numSamples, "Opuz")
+		public MainWin (int numSamples = 1)
+			: base(1024, 800,"Opuz", 32, 24, 0, numSamples)
 		{			
 		}
 

@@ -52,7 +52,7 @@ namespace Opuz2015
 
 		public object Mutex = new object();
 
-		public Texture Image;
+		public GGL.Texture Image;
 		public Cutter cutter = null;
 
 		public int nbSides {
@@ -177,7 +177,7 @@ namespace Opuz2015
 		#region CTOR
 		public Puzzle (int _nbx, int _nby, string _imgPath, int _Sides = 4)
 		{
-			Image = new Texture (_imgPath);
+			Image = new GGL.Texture (_imgPath);
 
 			nbPieceX = _nbx;
 			nbPieceY = _nby;
@@ -441,12 +441,12 @@ namespace Opuz2015
 		Vector3[] transform(Vector3[] points, Matrix4 mat){
 			Vector3[] tmp = new Vector3[points.Length];
 			for (int i = 0; i < points.Length; i++) 
-				tmp [i] = Vector3.Transform (points [i], mat);
+				tmp [i] = points [i].Transform (mat);
 			return tmp;
 		}
 		void transform(ref Vector3[] points, Matrix4 mat){
 			for (int i = 0; i < points.Length; i++) 
-				points [i] = Vector3.Transform (points [i], mat);			
+				points [i] = points [i].Transform (mat);
 		}
 		#endregion
 
@@ -455,7 +455,7 @@ namespace Opuz2015
 		void createProfileTexture(uint[] indProfile)
 		{
 			int fbo;
-			profileTexture = new Texture (Image.Width, Image.Height);
+			profileTexture = new GGL.Texture (Image.Width, Image.Height);
 
 			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture(TextureTarget.Texture2D, profileTexture);

@@ -3,8 +3,6 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2012
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opuz2015", "Opuz2015.csproj", "{7360A69B-5E5B-484D-857B-57D0F2C9BC32}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crow", "lib\Crow\Crow.csproj", "{C2980F9B-4798-4C05-99E2-E174810F7C7B}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "lib\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
 EndProject
 Global
@@ -41,17 +39,5 @@ Global
 		{7360A69B-5E5B-484D-857B-57D0F2C9BC32}.Release|Win_x86.Build.0 = Release|x86
 		{7360A69B-5E5B-484D-857B-57D0F2C9BC32}.Release|x86.ActiveCfg = Release|x86
 		{7360A69B-5E5B-484D-857B-57D0F2C9BC32}.Release|x86.Build.0 = Release|x86
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Linux_x86.ActiveCfg = Debug|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Linux_x86.Build.0 = Debug|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Win_x86.ActiveCfg = Debug|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Win_x86.Build.0 = Debug|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|x86.ActiveCfg = Debug|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|x86.Build.0 = Debug|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Linux_x86.ActiveCfg = Release|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Linux_x86.Build.0 = Release|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Win_x86.ActiveCfg = Release|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Win_x86.Build.0 = Release|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|x86.ActiveCfg = Release|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
