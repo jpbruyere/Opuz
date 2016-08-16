@@ -2,7 +2,7 @@
 <Project DefaultTargets="Build" ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
-    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{7360A69B-5E5B-484D-857B-57D0F2C9BC32}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <RootNamespace>Opuz2015</RootNamespace>
@@ -10,8 +10,13 @@
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <OutputPath>$(SolutionDir)/build/$(Configuration)</OutputPath>
     <IntermediateOutputPath>$(SolutionDir)/build/obj/$(Configuration)</IntermediateOutputPath>
+    <CustomCommands>
+      <CustomCommands>
+        <Command type="Execute" command="${TargetName}" workingdir="${SolutionDir}/build/${ProjectConfigName}" />
+      </CustomCommands>
+    </CustomCommands>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
@@ -19,11 +24,10 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
-    <PlatformTarget>x86</PlatformTarget>
     <IntermediateOutputPath>$(SolutionDir)\build\obj\$(Configuration)</IntermediateOutputPath>
     <OutputPath>$(SolutionDir)\build\$(Configuration)</OutputPath>
   </PropertyGroup>
-  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <Optimize>true</Optimize>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -32,7 +36,6 @@
     <OutputPath>$(SolutionDir)\build\$(Configuration)</OutputPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
-  <Import Project="packages\GtkSharp.3.1.0\build\net45\GtkSharp.targets" Condition="Exists('packages\GtkSharp.3.1.0\build\net45\GtkSharp.targets')" />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -41,23 +44,20 @@
     <Reference Include="OpenTK">
       <HintPath>packages\OpenTK.Next.1.2.2336.6514-pre\lib\net20\OpenTK.dll</HintPath>
     </Reference>
-    <Reference Include="atk-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\atk-sharp.dll</HintPath>
-    </Reference>
     <Reference Include="cairo-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\cairo-sharp.dll</HintPath>
+      <Package>gtk-sharp-3.0</Package>
     </Reference>
     <Reference Include="gdk-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\gdk-sharp.dll</HintPath>
+      <Package>gtk-sharp-2.0</Package>
     </Reference>
     <Reference Include="gio-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\gio-sharp.dll</HintPath>
+      <Package>gio-sharp-3.0</Package>
     </Reference>
     <Reference Include="glib-sharp">
-      <HintPath>packages\GtkSharp.3.1.0\lib\net45\glib-sharp.dll</HintPath>
+      <Package>glib-sharp-3.0</Package>
     </Reference>
     <Reference Include="Crow">
-      <HintPath>packages\Crow.OpenTK.0.4.5\lib\net45\Crow.dll</HintPath>
+      <HintPath>packages\Crow.OpenTK.0.4.6\lib\net45\Crow.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -67,10 +67,10 @@
     <Compile Include="shaders\PuzzleShader.cs" />
     <Compile Include="Cutter.cs" />
     <Compile Include="RenderCache.cs" />
-    <Compile Include="packages\Crow.OpenTK.0.4.5\content\OpenGL\Shader.cs" />
-    <Compile Include="packages\Crow.OpenTK.0.4.5\content\OpenGL\Texture.cs" />
-    <Compile Include="packages\Crow.OpenTK.0.4.5\content\OpenGL\vaoMesh.cs" />
-    <Compile Include="packages\Crow.OpenTK.0.4.5\content\OpenTKGameWindow.cs" />
+    <Compile Include="packages\Crow.OpenTK.0.4.6\content\OpenGL\Shader.cs" />
+    <Compile Include="packages\Crow.OpenTK.0.4.6\content\OpenGL\Texture.cs" />
+    <Compile Include="packages\Crow.OpenTK.0.4.6\content\OpenGL\vaoMesh.cs" />
+    <Compile Include="packages\Crow.OpenTK.0.4.6\content\OpenTKGameWindow.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="shaders\" />
@@ -93,7 +93,7 @@
     <EmbeddedResource Include="shaders\cache.frag" />
     <EmbeddedResource Include="ui\Button.template" />
     <EmbeddedResource Include="Images\button.svg" />
-    <EmbeddedResource Include="ui\Button.style" />
+    <EmbeddedResource Include="ui\Opuz.style" />
   </ItemGroup>
   <ItemGroup>
     <None Include="Images\2.jpg">

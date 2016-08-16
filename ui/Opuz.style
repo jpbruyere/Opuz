@@ -1,0 +1,10 @@
+﻿ImgSpin {
+	Focusable = true;
+	KeepProportions = false;
+	Margin = 3;
+	MouseEnter = {Background=BlueCrayola}
+	MouseLeave = {Background=Transparent}
+	Height = 35%;
+	MouseRepeat = true;
+	Path = #Crow.Images.Icons.updown.svg;
+}

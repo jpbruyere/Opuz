@@ -3,5 +3,5 @@
 	Height="{../HeightPolicy}" Width="{../WidthPolicy}"
 	MouseEnter="../onBorderMouseEnter"
 	MouseLeave="../onBorderMouseLeave"
-	Background="vgradient|0:0,6;0,6;0,6;0,9|1:0,4;0,4;0,4;0,6">
+	Background="vgradient|0:0.6,0.6,0.6,0.9|1:0.4,0.4,0.4,0.6">
 </Border>

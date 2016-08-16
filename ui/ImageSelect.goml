@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Border BorderWidth="2" Width="80%" Height="80%" Background="0,5;0,5;0,7;0,7" CornerRadius="10">
+<Border BorderWidth="2" Width="80%" Height="80%" Background="0.5,0.5,0.7,0.7" CornerRadius="10">
 	<ListBox Data="{Images}"
 		SelectedItemChanged="onSelectedImageChanged"
 		ItemTemplate="#Opuz2015.ui.imgItem.goml">

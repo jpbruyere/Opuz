@@ -1,5 +1,5 @@
 ﻿<?xml version="1.0"?>
-<Group MinimumSize="50;20" Height="{../HeightPolicy}" Width="{../WidthPolicy}"
+<Group MinimumSize="50,20" Height="{../HeightPolicy}" Width="{../WidthPolicy}"
 		Foreground="Transparent" CornerRadius="{../CornerRadius}" 
 	MouseEnter="{caption.Foreground=BlueCrayola}"
 	MouseLeave="{caption.Foreground=DimGray}">
