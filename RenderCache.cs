@@ -154,7 +154,7 @@ namespace Opuz2015
 			//			GL.BindTexture (TextureTarget.Texture2D, depthTex);
 			GL.ActiveTexture (TextureUnit.Texture0);
 			GL.BindTexture (TextureTarget.Texture2DMultisample, colorTex);
-			Tetra.ShadedTexture.quad.Render (PrimitiveType.TriangleStrip);
+			Tetra.ShadedTexture.quad.Render (BeginMode.TriangleStrip);
 		}
 
 		#region IDisposable implementation

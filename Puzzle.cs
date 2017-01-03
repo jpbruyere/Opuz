@@ -304,13 +304,13 @@ namespace Opuz2015
 				for (int i = 0; i < nbSides; i++) {
 					if (p.IsLinked [i])
 						continue;
-					GL.DrawElements (PrimitiveType.TriangleStrip, p.indBorderLength[i],
+					GL.DrawElements (BeginMode.TriangleStrip, p.indBorderLength[i],
 						DrawElementsType.UnsignedInt, p.IndBorderPtr[i]);
 				}
 
 				MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
 
-				GL.DrawElements (PrimitiveType.Triangles, p.indFillLength,
+				GL.DrawElements (BeginMode.Triangles, p.indFillLength,
 					DrawElementsType.UnsignedInt, p.IndFillPtr);
 			}
 
@@ -500,7 +500,7 @@ namespace Opuz2015
 
 			GL.BindVertexArray(vaoHandle);
 			GL.LineWidth(3);
-			GL.DrawElements (PrimitiveType.LineLoop, indProfile.Length,
+			GL.DrawElements (BeginMode.LineLoop, indProfile.Length,
 				DrawElementsType.UnsignedInt, indProfile);
 			GL.BindVertexArray (0);
 			GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);

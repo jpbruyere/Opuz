@@ -21,23 +21,8 @@ namespace Opuz2015
 {
 	public enum GameState { Init, CutStart, CutFinished, Play, Finished};
 
-	class MainWin : OpenTKGameWindow, IBindable
+	class MainWin : OpenTKGameWindow
 	{
-		#region IBindable implementation
-		List<Binding> bindings = new List<Binding> ();
-		public List<Binding> Bindings {
-			get { return bindings; }
-		}
-		public object DataSource {
-			get {
-				throw new NotImplementedException ();
-			}
-			set {
-				throw new NotImplementedException ();
-			}
-		}
-		#endregion
-
 		#region  scene matrix and vectors
 		public static Matrix4 modelview;
 		public static Matrix4 projection;
@@ -123,7 +108,7 @@ namespace Opuz2015
 			mainMenu.DataSource = this;
 			mainMenu.Visible = false;
 
-			Crow.CompilerServices.ResolveBindings (this.Bindings);
+
 			mainMenu.Visible = true;
 		}
 		void showFinishedMsg(){

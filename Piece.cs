@@ -333,7 +333,7 @@ namespace Opuz2015
 //			MainWin.mainShader.ColorMultiplier = 1.0f;
 //			MainWin.mainShader.Color = new Vector4 (0, 0, 0, 1);
 //
-//			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
+//			GL.DrawElements (BeginMode.Triangles, IndFill.Length,
 //				DrawElementsType.UnsignedInt, IndFill);
 //		}
 		public void Render(){
@@ -345,12 +345,12 @@ namespace Opuz2015
 			for (int i = 0; i < puzzle.nbSides; i++) {
 				if (IsLinked [i])
 					continue;
-				GL.DrawElements (PrimitiveType.TriangleStrip, IndBorder[i].Length,
+				GL.DrawElements (BeginMode.TriangleStrip, IndBorder[i].Length,
 					DrawElementsType.UnsignedInt, IndBorder[i]);
 			}
 			//face
 //			MainWin.mainShader.Color = new Vector4 (1, 1, 1, 1);
-//			GL.DrawElements (PrimitiveType.Triangles, IndFill.Length,
+//			GL.DrawElements (BeginMode.Triangles, IndFill.Length,
 //				DrawElementsType.UnsignedInt, IndFill);
 		}
 		#endregion
