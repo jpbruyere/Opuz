@@ -121,8 +121,8 @@ namespace Opuz2015
 			if (imgSelection == null) {
 				imgSelection = CrowInterface.LoadInterface ("#Opuz2015.ui.ImageSelect.goml");
 				imgSelection.DataSource = this;
-			}
-			imgSelection.Visible = true;
+			}else
+				imgSelection.Visible = true;
 			mainMenu.Visible = false;
 		}
 		void onSelectedImageChanged(object sender, SelectionChangeEventArgs e){
@@ -441,8 +441,8 @@ namespace Opuz2015
 		#endregion
 
 		#region CTOR and Main
-		public MainWin (int numSamples = 1)
-			: base(1024, 800,"Opuz", 32, 24, 0, numSamples)
+		public MainWin (int numSamples = 4)
+			: base(800, 600,"Opuz", 32, 24, 0, numSamples)
 		{			
 		}
 
