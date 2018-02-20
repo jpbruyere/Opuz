@@ -21,7 +21,7 @@ namespace Opuz2015
 {
 	public enum GameState { Init, CutStart, CutFinished, Play, Finished};
 
-	class MainWin : OpenTKGameWindow
+	class MainWin : CrowWindow
 	{
 		#region  scene matrix and vectors
 		public static Matrix4 modelview;
@@ -98,28 +98,28 @@ namespace Opuz2015
 			//special event handlers fired only if mouse not in interface objects
 			//for scene mouse handling
 			MouseMove += Mouse_Move;
-			MouseButtonDown += Mouse_ButtonDown;
-			MouseButtonUp += Mouse_ButtonUp;
-			MouseWheelChanged += Mouse_WheelChanged;
+			MouseDown += Mouse_ButtonDown;
+			MouseUp += Mouse_ButtonUp;
+			MouseWheel += Mouse_WheelChanged;
 			//KeyboardKeyDown += MainWin_KeyboardKeyDown;
 
-			CrowInterface.LoadInterface("#Opuz2015.ui.fps.crow").DataSource = this;
-			mainMenu = CrowInterface.LoadInterface("#Opuz2015.ui.MainMenu.goml");
+			//Load("#Opuz2015.ui.fps.crow").DataSource = this;
+			mainMenu = Load("#Opuz2015.ui.MainMenu.goml");
 			mainMenu.DataSource = this;
-			mainMenu.Visible = false;
-
-
-			mainMenu.Visible = true;
+//			mainMenu.Visible = false;
+//
+//
+//			mainMenu.Visible = true;
 		}
 		void showFinishedMsg(){
 			if (finishedMessage != null)
 				return;
-			finishedMessage = CrowInterface.LoadInterface("#Opuz2015.ui.Finished.goml");
+			finishedMessage = Load("#Opuz2015.ui.Finished.goml");
 			finishedMessage.DataSource = this;
 		}
 		void onImageClick (object sender, Crow.MouseButtonEventArgs e){			
 			if (imgSelection == null) {
-				imgSelection = CrowInterface.LoadInterface ("#Opuz2015.ui.ImageSelect.goml");
+				imgSelection = Load ("#Opuz2015.ui.ImageSelect.goml");
 				imgSelection.DataSource = this;
 			}else
 				imgSelection.Visible = true;
@@ -218,7 +218,7 @@ namespace Opuz2015
 			currentState = GameState.Init;
 
 			if (finishedMessage != null) {
-				CrowInterface.DeleteWidget (finishedMessage);
+				DeleteWidget (finishedMessage);
 				finishedMessage = null;
 			}
 			mainMenu.Visible = true;

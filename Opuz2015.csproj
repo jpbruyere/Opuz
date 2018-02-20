@@ -24,11 +24,15 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <ConsolePause>false</ConsolePause>
+    <IntermediateOutputPath>$(SolutionDir)\build\obj\$(Configuration)</IntermediateOutputPath>
+    <OutputPath>$(SolutionDir)\build\$(Configuration)</OutputPath>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>none</DebugType>
     <Optimize>true</Optimize>
     <WarningLevel>0</WarningLevel>
+    <IntermediateOutputPath>$(SolutionDir)\build\obj\$(Configuration)</IntermediateOutputPath>
+    <OutputPath>$(SolutionDir)\build\$(Configuration)</OutputPath>
   </PropertyGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <ItemGroup>
@@ -36,20 +40,11 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Xml" />
     <Reference Include="System.Drawing" />
-    <Reference Include="gio-sharp">
-      <Package>gio-sharp-3.0</Package>
-    </Reference>
-    <Reference Include="gdk-sharp">
-      <Package>gtk-sharp-2.0</Package>
-    </Reference>
-    <Reference Include="glib-sharp">
-      <Package>glib-sharp-3.0</Package>
-    </Reference>
-    <Reference Include="cairo-sharp">
-      <Package>gtk-sharp-3.0</Package>
-    </Reference>
     <Reference Include="OpenTK">
       <HintPath>packages\OpenTK.2.0.0\lib\net20\OpenTK.dll</HintPath>
+    </Reference>
+    <Reference Include="Crow">
+      <HintPath>packages\Crow.OpenTK.0.7.0\lib\net45\Crow.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>
@@ -59,18 +54,12 @@
     <Compile Include="shaders\PuzzleShader.cs" />
     <Compile Include="Cutter.cs" />
     <Compile Include="RenderCache.cs" />
-    <Compile Include="lib\Crow\Tests\OpenTKGameWindow.cs">
-      <Link>src\OpenTKGameWindow.cs</Link>
-    </Compile>
-    <Compile Include="lib\Crow\Tests\OpenGL\Shader.cs">
-      <Link>src\Shader.cs</Link>
-    </Compile>
-    <Compile Include="lib\Crow\Tests\OpenGL\Texture.cs">
-      <Link>src\Texture.cs</Link>
-    </Compile>
-    <Compile Include="lib\Crow\Tests\OpenGL\vaoMesh.cs">
-      <Link>src\vaoMesh.cs</Link>
-    </Compile>
+    <Compile Include="InterfaceControler.cs" />
+    <Compile Include="CrowWindow.cs" />
+    <Compile Include="OpenGL\Shader.cs" />
+    <Compile Include="OpenGL\Texture.cs" />
+    <Compile Include="OpenGL\vaoMesh.cs" />
+    <Compile Include="OpenGL\Extensions.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="shaders\" />
@@ -139,15 +128,12 @@
     </None>
     <None Include="OpenTK.dll.config" />
     <None Include="packages.config" />
+    <None Include="Crow.dll.config" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="lib\GGL\GGL.csproj">
       <Project>{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}</Project>
       <Name>GGL</Name>
-    </ProjectReference>
-    <ProjectReference Include="lib\Crow\Crow.csproj">
-      <Project>{C2980F9B-4798-4C05-99E2-E174810F7C7B}</Project>
-      <Name>Crow</Name>
     </ProjectReference>
   </ItemGroup>
 </Project>

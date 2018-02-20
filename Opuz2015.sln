@@ -5,8 +5,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Opuz2015", "Opuz2015.csproj
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GGL", "lib\GGL\GGL.csproj", "{5490AD74-0BB3-438C-9DE4-EB7CFC68BCB5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Crow", "lib\Crow\Crow.csproj", "{C2980F9B-4798-4C05-99E2-E174810F7C7B}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,9 +19,5 @@ Global
 		{7360A69B-5E5B-484D-857B-57D0F2C9BC32}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7360A69B-5E5B-484D-857B-57D0F2C9BC32}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7360A69B-5E5B-484D-857B-57D0F2C9BC32}.Release|Any CPU.Build.0 = Release|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{C2980F9B-4798-4C05-99E2-E174810F7C7B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
